@@ -14,7 +14,8 @@ import markdown
 ROOT = Path(__file__).parent
 CONTENT = ROOT / "content"
 OUT = ROOT / "site"
-VER = "1"
+import hashlib
+VER = hashlib.sha1(b"".join(f.read_bytes() for f in sorted((ROOT / "assets").glob("*/*.*")) if f.suffix in (".css", ".js"))).hexdigest()[:8]   # сброс кэша при любой правке
 
 NOTATIONS = [  # slug, короткое имя, полное имя, автор листа, вопрос
     ("flowchart", "Flow Chart", "Блок-схема", "Красношлыков Пётр", "Какие шаги и в каком порядке?"),

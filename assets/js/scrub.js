@@ -1,126 +1,91 @@
-/* Прорисовка листов по прокрутке (scroll-scrub), полоса чтения, появление карточек, полноэкранный лист */
+/* Общее поведение страниц: полоса чтения, появление блоков, липкое оглавление с подсветкой раздела,
+   просмотр листа во весь экран с масштабом и перемещением. Диаграммы НЕ привязаны к прокрутке. */
 (() => {
-  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const root = document.documentElement;
-  if (!reduce) root.classList.add("js-scrub");
-  const clamp = (v) => Math.max(0, Math.min(1, v));
-  const sheets = [];
+  const motion = root.classList.contains("js-scrub");
 
-  function prepare(sec) {
-    const svg = sec.querySelector(".sheet__draw svg");
-    if (!svg || sec._ready) return;
-    const vb = svg.viewBox && svg.viewBox.baseVal;
-    if (vb && vb.width && vb.height / vb.width > 1.1) sec.classList.add("scrub--tall");   // высокие схемы не закрепляем
-    const box = svg.getBoundingClientRect();
-    if (!box.width) return;
-    const area = box.width * box.height;
-    const skip = "defs *, marker *, pattern *, clipPath *, mask *, symbol *";
-    const items = [];
-    svg.querySelectorAll("path, line, polyline, polygon, rect, circle, ellipse, text, foreignObject").forEach((el) => {
-      if (el.matches(skip) || el.closest(".pkt")) return;
-      const r = el.getBoundingClientRect();
-      if (!r.width && !r.height) return;
-      if (r.width * r.height > area * 0.6) return;            // фон и рамка листа остаются на месте
-      if (el.classList.contains("s-draw") || el.classList.contains("s-fade")) {   // уже размечен
-        items.push({ el, kind: el.classList.contains("s-draw") ? "draw" : "fade", x: r.left - box.left, y: r.top - box.top });
-        return;
-      }
-      const cs = getComputedStyle(el);
-      const isText = el.matches("text, foreignObject");
-      const dashed = cs.strokeDasharray && cs.strokeDasharray !== "none";
-      const stroked = cs.stroke && cs.stroke !== "none" && parseFloat(cs.strokeWidth) > 0;
-      const kind = !isText && stroked && !dashed ? "draw" : "fade";
-      if (kind === "draw") { el.setAttribute("pathLength", "1"); el.classList.add("s-draw"); }
-      else el.classList.add("s-fade");
-      items.push({ el, kind, x: r.left - box.left, y: r.top - box.top });
-    });
-    const wide = box.width > box.height * 1.15;
-    items.sort((a, b) => (wide ? a.x + a.y * 0.25 - (b.x + b.y * 0.25) : a.y + a.x * 0.25 - (b.y + b.x * 0.25)));
-    const n = items.length || 1;
-    const dur = Math.max(0.05, Math.min(0.3, 8 / n));
-    items.forEach((it, i) => { it.start = (i / n) * (1 - dur); it.dur = dur; it.last = -1; });
-    sec._items = items;
-    sec._ready = true;
-    sec._full = false;
-    paint(sec, sec._p ?? 0, true);
-  }
-
-  function paint(sec, p, force) {
-    const items = sec._items;
-    if (!items) return;
-    if (!force && Math.abs((sec._p ?? -1) - p) < 0.002) return;
-    sec._p = p;
-    const fig = sec.querySelector(".sheet");
-    fig.style.setProperty("--p", p.toFixed(3));
-    fig.classList.toggle("is-drawn", p >= 1);
-    for (const it of items) {
-      const t = clamp((p - it.start) / it.dur);
-      const q = Math.round(t * 100) / 100;
-      if (q === it.last) continue;
-      it.last = q;
-      if (it.kind === "draw") {
-        it.el.style.setProperty("--t", q);
-        it.el.style.fillOpacity = q;
-        it.el.style.opacity = Math.min(1, q * 8);
-      } else it.el.style.setProperty("--o", q);
-    }
-  }
-
-  function progress(sec, vh) {
-    const r = sec.getBoundingClientRect();
-    const pinned = !sec.classList.contains("scrub--tall") && r.height > vh * 1.2;
-    if (pinned) return clamp((vh * 0.45 - r.top) / (r.height - vh * 0.55) / 0.82);   // старт, когда лист поднялся к середине экрана
-    return clamp((vh * 0.9 - r.top) / (Math.max(r.height, 200) * 0.85));
-  }
-
-  function frame() {
-    ticking = false;
-    const vh = innerHeight;
-    const docH = root.scrollHeight - vh;
-    root.style.setProperty("--read", docH > 0 ? (scrollY / docH).toFixed(4) : 0);
-    if (reduce) return;
-    for (const sec of sheets) {
-      if (!sec._ready) prepare(sec);
-      if (!sec._ready || sec._full) continue;
-      paint(sec, progress(sec, vh));
-    }
-  }
+  // полоса чтения в шапке
   let ticking = false;
-  const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
+  const read = () => {
+    ticking = false;
+    const h = root.scrollHeight - innerHeight;
+    root.style.setProperty("--read", h > 0 ? (scrollY / h).toFixed(4) : 0);
+  };
+  addEventListener("scroll", () => { if (!ticking) { ticking = true; requestAnimationFrame(read); } }, { passive: true });
+  read();
 
-  function init() {
-    document.querySelectorAll(".scrub").forEach((sec) => {
-      sheets.push(sec);
-      const btn = sec.querySelector(".sheet__full");
-      const fig = sec.querySelector(".sheet");
-      btn?.addEventListener("click", () => toggleFull(sec, fig, btn));
-      fig.addEventListener("dblclick", () => toggleFull(sec, fig, btn));
-    });
-    addEventListener("scroll", onScroll, { passive: true });
-    addEventListener("resize", onScroll);
-    document.addEventListener("mermaid:rendered", () => {
-      sheets.filter((s) => s.dataset.kind === "mermaid").forEach((s) => { s._ready = false; s._items = null; });
-      onScroll();
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-      sheets.forEach((s) => { if (s._full) toggleFull(s, s.querySelector(".sheet"), s.querySelector(".sheet__full")); });
-    });
-    const cards = document.querySelectorAll(".cards");
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } }), { threshold: 0.12 });
-      cards.forEach((c) => io.observe(c));
-    } else cards.forEach((c) => c.classList.add("is-in"));
-    frame();
+  // появление блоков один раз при входе в экран
+  const io = "IntersectionObserver" in window && motion
+    ? new IntersectionObserver((es) => es.forEach((e) => {
+        if (!e.isIntersecting) return;
+        e.target.classList.add("is-in"); io.unobserve(e.target);
+      }), { rootMargin: "0px 0px -8% 0px", threshold: 0.08 })
+    : null;
+  const reveal = document.querySelectorAll(".doc > h2, .doc > h3, .doc > p, .doc > ol, .doc > ul, .table-wrap, .margin-note, .scrub, .lh-pick, .cards, .passport__row, .lh-refs, .team__row");
+  reveal.forEach((el, i) => {
+    if (!io) { el.classList.add("is-in"); return; }
+    el.classList.add("rv");
+    if (el.matches(".passport__row")) el.style.transitionDelay = `${(i % 6) * 70}ms`;
+    io.observe(el);
+  });
+  // строки таблиц – каскадом
+  document.querySelectorAll(".table-wrap tbody tr").forEach((tr, i) => tr.style.setProperty("--d", `${Math.min(i, 12) * 45}ms`));
+
+  // липкое оглавление: подсветка текущего раздела
+  const toc = document.querySelector(".toc");
+  if (toc) {
+    const links = [...toc.querySelectorAll("a")];
+    const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1)))).filter(Boolean);
+    const spy = () => {
+      let cur = 0;
+      heads.forEach((h, i) => { if (h.getBoundingClientRect().top < innerHeight * 0.35) cur = i; });
+      links.forEach((a, i) => a.classList.toggle("is-on", i === cur));
+      toc.classList.toggle("is-stuck", toc.getBoundingClientRect().top <= parseFloat(getComputedStyle(root).getPropertyValue("--top")) + 1);
+    };
+    addEventListener("scroll", () => requestAnimationFrame(spy), { passive: true });
+    spy();
   }
 
-  function toggleFull(sec, fig, btn) {
-    sec._full = !sec._full;
-    fig.classList.toggle("is-full", sec._full);
-    document.body.style.overflow = sec._full ? "hidden" : "";
-    if (btn) btn.textContent = sec._full ? "✕ закрыть" : "⤢ во весь экран";
-    if (sec._full) paint(sec, 1, true); else onScroll();
-  }
+  // лист во весь экран: колесо – масштаб, перетаскивание – сдвиг, двойной щелчок – сброс
+  document.querySelectorAll(".sheet").forEach((fig) => {
+    const btn = fig.querySelector(".sheet__full");
+    const draw = fig.querySelector(".sheet__draw");
+    let z = 1, x = 0, y = 0, drag = null;
+    const apply = () => {
+      const c = draw.firstElementChild;
+      if (c) c.style.transform = fig.classList.contains("is-full") ? `translate(${x}px, ${y}px) scale(${z})` : "";
+    };
+    const toggle = (on) => {
+      fig.classList.toggle("is-full", on);
+      document.body.style.overflow = on ? "hidden" : "";
+      btn.textContent = on ? "✕ закрыть · Esc" : "⤢ во весь экран";
+      z = 1; x = 0; y = 0; apply();
+    };
+    btn.addEventListener("click", () => toggle(!fig.classList.contains("is-full")));
+    draw.addEventListener("dblclick", () => fig.classList.contains("is-full") ? (z = 1, x = 0, y = 0, apply()) : toggle(true));
+    draw.addEventListener("wheel", (e) => {
+      if (!fig.classList.contains("is-full")) return;
+      e.preventDefault();
+      const k = Math.exp(-e.deltaY * 0.0015);
+      const r = draw.getBoundingClientRect();
+      const px = e.clientX - r.left - r.width / 2 - x, py = e.clientY - r.top - r.height / 2 - y;
+      const nz = Math.max(0.5, Math.min(6, z * k));
+      x -= px * (nz / z - 1); y -= py * (nz / z - 1); z = nz; apply();
+    }, { passive: false });
+    draw.addEventListener("pointerdown", (e) => {
+      if (!fig.classList.contains("is-full")) return;
+      drag = { sx: e.clientX - x, sy: e.clientY - y }; draw.setPointerCapture(e.pointerId); draw.classList.add("is-drag");
+    });
+    draw.addEventListener("pointermove", (e) => { if (drag) { x = e.clientX - drag.sx; y = e.clientY - drag.sy; apply(); } });
+    draw.addEventListener("pointerup", () => { drag = null; draw.classList.remove("is-drag"); });
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && fig.classList.contains("is-full")) toggle(false); });
+  });
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
+  // ← → – соседние листы альбома
+  const prev = document.querySelector(".pager__prev"), next = document.querySelector(".pager__next");
+  addEventListener("keydown", (e) => {
+    if (e.target.closest("input, textarea") || document.querySelector(".sheet.is-full") || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key === "ArrowRight" && next) location.href = next.href;
+    if (e.key === "ArrowLeft" && prev) location.href = prev.href;
+  });
 })();

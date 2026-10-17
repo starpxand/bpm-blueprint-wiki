@@ -1,7 +1,7 @@
 """Сборка сайта «Бюро нотаций»: content/*.md -> site/*.html.
 
 Тексты нотаций совпадают с командной мини-wiki (bpm-modeling-wiki); здесь меняется только подача:
-каждая диаграмма – лист чертежа, который прорисовывается синхронно с прокруткой (scroll-scrub).
+каждая диаграмма – лист чертежа со штампом; обложка – полёт сквозь альбом по прокрутке (scroll-scrub).
 Запуск: python build.py  ->  папка site/ (её публикует GitHub Actions).
 """
 import html
@@ -97,7 +97,7 @@ def sheet(inner, caption, notation, author, n_sheet, kind="svg"):
 <section class="scrub" data-kind="{kind}">
   <div class="scrub__pin">
     <figure class="sheet" data-sheet>
-      <div class="sheet__tools"><span class="sheet__progress" aria-hidden="true"><i></i></span>
+      <div class="sheet__tools"><span class="sheet__hint">двойной щелчок – крупно · колесо – масштаб</span>
         <button type="button" class="sheet__full" aria-label="Открыть во весь экран">⤢ во весь экран</button></div>
       <div class="sheet__draw">{inner}</div>
       <figcaption class="stamp">
@@ -238,7 +238,7 @@ def notation_page(i, slug, short, full, author, question):
         md = re.sub(r'<div class="lh-bpmn"[^>]*markdown>\s*(.*?)\s*</div>', r"\1", md, flags=re.S)
         md = re.sub(r"Это файл BPMN 2\.0, открытый движком bpmn-js.*?шаг за шагом\.",
                     "Лист построен по файлу BPMN 2.0, созданному в редакторе bpmn-js [[5]](../sources.html#src-5), "
-                    f"и прорисовывается по мере прокрутки; интерактивную модель с пошаговым проходом можно открыть "
+                    f"; интерактивную модель с пошаговым проходом можно открыть "
                     f"в [командной мини-wiki]({TEAM_WIKI}notations/bpmn/).", md, flags=re.S)
     body = md_to_html(md)
     body, n = sheets(body, short, author)
@@ -262,9 +262,9 @@ def notation_page(i, slug, short, full, author, question):
     <p class="sheet-hero__q">«{html.escape(question)}»</p>
     <div class="passport">{passport}
       <div class="passport__row"><span>Лист подготовил(а)</span><b>{html.escape(author)}</b></div></div>
-    <nav class="toc" aria-label="Разделы листа">{toc}</nav>
   </div>
-</section>"""
+</section>
+<nav class="toc" aria-label="Разделы листа">{toc}</nav>"""
     article = f'<article class="doc">{body}</article>{pager}'
     out = page(title, hero + article, 1, slug, desc=f"{title}: описание, элементы нотации, правила составления, пример, источники",
                mermaid="mermaid" in body, path=f"notations/{slug}.html")
@@ -432,8 +432,8 @@ def index_page():
   <div class="band__in doc">
     <h2>Как устроен каждый лист</h2>
     {layout_html}
-    <p>Диаграммы – настоящие чертежи нотаций, а не иллюстрации: при прокрутке лист закрепляется на экране, и
-    линии, фигуры и подписи появляются в порядке чтения схемы. Кнопка «⤢ во весь экран» открывает готовый лист целиком.</p>
+    <p>Диаграммы – настоящие чертежи нотаций, а не иллюстрации: каждая оформлена листом со штампом, двойной щелчок
+    открывает лист во весь экран, колесо мыши масштабирует, перетаскивание сдвигает.</p>
   </div>
 </section>
 

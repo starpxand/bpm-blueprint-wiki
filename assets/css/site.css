@@ -491,9 +491,11 @@ article.doc::before {   /* рамка листа по ГОСТ: 20 мм слев
   .story__stage { max-height: none; min-height: 0; }
   .story__final { margin-top: 6px; font-size: 13px; }
   .js-scrub .flight { height: 820vh; }
-  .flight__intro { top: 5%; right: 16px; }
-  .flight__intro h1 { white-space: normal; }
-  .flight__lead { font-size: 15px; max-width: none; }
+  .flight__intro { top: 3%; right: 16px; }
+  .flight__intro h1 { white-space: normal; font-size: clamp(34px, 10vw, 46px); margin-bottom: 14px; }
+  .flight__lead { font-size: 14.5px; line-height: 1.5; max-width: none; margin-bottom: 18px; }
+  .flight__cta { flex-wrap: nowrap; gap: 8px; }
+  .flight__cta .btn { padding: 12px 14px; font-size: 13.5px; white-space: nowrap; }
   .flight__team { display: none; }
   .fsheet { width: min(92vw, calc(46svh * var(--ar, 1.5))); top: 40%; }
   .fcap { top: auto; bottom: 150px; left: 16px; right: 16px; width: auto; transform: none; padding: 12px 14px; gap: 3px; }

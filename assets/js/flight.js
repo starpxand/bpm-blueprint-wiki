@@ -42,6 +42,16 @@
     intro.style.transform = `translate3d(0, ${-io * 60}px, 0)`;
     intro.style.pointerEvents = io > 0.6 ? "none" : "";
 
+    // телефон: веер вписывается в свободное место под кнопками заставки
+    let mY = 0, mS = 1, mOk = true;
+    if (narrow) {
+      const sh = stage.getBoundingClientRect(), ib = intro.getBoundingClientRect();
+      const top = ib.bottom - sh.top + 18, room = sh.height - top - 18;
+      const h0 = sheets[0].offsetHeight || 1;
+      mOk = room > 150;
+      mS = Math.min(0.5, (room * 0.62) / h0);
+      mY = top + room / 2 - sh.height * 0.4;
+    }
     let active = -1;
     sheets.forEach((el, k) => {
       // полёт
@@ -53,19 +63,19 @@
       const tilt = clamp((fRel + R) / 900, -1, 1);                 // поворачивается, пролетая мимо
       // заставка: альбом веером справа от заголовка (первый лист сверху)
       const j = k - 3;
-      const dRel = (narrow ? -1500 : -1300) - k * 110;
-      const dDx = narrow ? j * 18 : innerWidth * 0.335 + j * innerWidth * 0.022;
-      const dDy = Math.abs(j) * (narrow ? 6 : 14) + (narrow ? innerHeight * 0.06 : 0);
+      const dRel = narrow ? -k * 12 : -1300 - k * 110;
+      const dDx = narrow ? j * innerWidth * 0.045 : innerWidth * 0.335 + j * innerWidth * 0.022;
+      const dDy = narrow ? mY + Math.abs(j) * 6 * mS : Math.abs(j) * 14;
       const e = smooth(io);
       const lerp = (a, b) => a + (b - a) * e;
       const rel = lerp(dRel, fRel), dx = lerp(dDx, fDx), dy = lerp(dDy, 0);
-      const rz = lerp(j * 4, 0), ry = lerp(-6 + sx * 6, side * (-4 + tilt * 12) - 6 + sx * 4), rx = lerp(4 - sy * 4, 2 - tilt * 6);
-      const op = lerp(narrow ? 0 : 1 - k * 0.04, Math.min(far, near));   // на телефоне на заставке листов нет – только текст
+      const rz = lerp(j * (narrow ? 5 : 4), 0), ry = lerp(-6 + sx * 6, side * (-4 + tilt * 12) - 6 + sx * 4), rx = lerp(4 - sy * 4, 2 - tilt * 6);
+      const op = lerp(narrow && !mOk ? 0 : 1 - k * 0.04, Math.min(far, near));
       el.style.opacity = op.toFixed(3);
       el.style.visibility = op <= 0.01 ? "hidden" : "visible";
       el.style.zIndex = String(10 - k);
       if (op > 0.01) {
-        el.style.transform = `translate3d(${dx}px, ${dy - sy * 30}px, ${rel}px) rotateY(${ry}deg) rotateX(${rx}deg) rotateZ(${rz}deg) translate(-50%, -50%)`;
+        el.style.transform = `translate3d(${dx}px, ${dy - sy * 30}px, ${rel}px) rotateY(${ry}deg) rotateX(${rx}deg) rotateZ(${rz}deg) translate(-50%, -50%) scale(${narrow ? lerp(mS, 1) : 1})`;
       }
       const d = Math.abs(s - (k + 0.5));
       const c = clamp(1 - (d - 0.22) / 0.16);

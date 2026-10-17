@@ -95,20 +95,12 @@ def svg_inline(name):
 def sheet(inner, caption, notation, author, n_sheet, kind="svg"):
     return f"""
 <section class="scrub" data-kind="{kind}">
-  <div class="scrub__pin">
-    <figure class="sheet" data-sheet>
-      <div class="sheet__tools"><span class="sheet__hint">двойной щелчок – крупно · колесо – масштаб</span>
-        <button type="button" class="sheet__full" aria-label="Открыть во весь экран">⤢ во весь экран</button></div>
-      <div class="sheet__draw">{inner}</div>
-      <figcaption class="stamp">
-        <span class="stamp__name">{html.escape(caption)}</span>
-        <span class="stamp__cell"><small>Нотация</small>{html.escape(notation)}</span>
-        <span class="stamp__cell"><small>Лист</small>{n_sheet}</span>
-        <span class="stamp__cell stamp__cell--wide"><small>Разраб.</small>{html.escape(author)}</span>
-        <span class="stamp__cell stamp__cell--org"><small>ФКТ КнАГУ</small>Бюро нотаций</span>
-      </figcaption>
-    </figure>
-  </div>
+  <figure class="sheet" data-sheet>
+    <button type="button" class="sheet__full" aria-label="Открыть во весь экран" title="Во весь экран (двойной щелчок)">⤢</button>
+    <div class="sheet__draw">{inner}</div>
+    <figcaption class="sheet__cap"><span><b>Рисунок {n_sheet}</b> – {html.escape(caption)}</span>
+      <span class="sheet__by">{html.escape(notation)} · {html.escape(author)}</span></figcaption>
+  </figure>
 </section>"""
 
 
@@ -237,8 +229,8 @@ def notation_page(i, slug, short, full, author, question):
     if slug == "bpmn":   # статичный лист вместо встроенного bpmn-js
         md = re.sub(r'<div class="lh-bpmn"[^>]*markdown>\s*(.*?)\s*</div>', r"\1", md, flags=re.S)
         md = re.sub(r"Это файл BPMN 2\.0, открытый движком bpmn-js.*?шаг за шагом\.",
-                    "Лист построен по файлу BPMN 2.0, созданному в редакторе bpmn-js [[5]](../sources.html#src-5), "
-                    f"; интерактивную модель с пошаговым проходом можно открыть "
+                    "Диаграмма построена по файлу BPMN 2.0, созданному в редакторе bpmn-js [[5]](../sources.html#src-5). "
+                    f"Интерактивную модель с пошаговым проходом можно открыть "
                     f"в [командной мини-wiki]({TEAM_WIKI}notations/bpmn/).", md, flags=re.S)
     body = md_to_html(md)
     body, n = sheets(body, short, author)
@@ -432,8 +424,8 @@ def index_page():
   <div class="band__in doc">
     <h2>Как устроен каждый лист</h2>
     {layout_html}
-    <p>Диаграммы – настоящие чертежи нотаций, а не иллюстрации: каждая оформлена листом со штампом, двойной щелчок
-    открывает лист во весь экран, колесо мыши масштабирует, перетаскивание сдвигает.</p>
+    <p>Диаграммы – настоящие чертежи нотаций, а не иллюстрации. Щелчок по значку ⤢ или двойной щелчок открывает
+    диаграмму во весь экран: колесо мыши масштабирует, перетаскивание сдвигает.</p>
   </div>
 </section>
 

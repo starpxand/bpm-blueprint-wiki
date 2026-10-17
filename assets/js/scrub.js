@@ -21,7 +21,7 @@
         e.target.classList.add("is-in"); io.unobserve(e.target);
       }), { rootMargin: "0px 0px -8% 0px", threshold: 0.08 })
     : null;
-  const reveal = document.querySelectorAll(".doc > h2, .doc > h3, .doc > p, .doc > ol, .doc > ul, .table-wrap, .margin-note, .scrub, .lh-pick, .cards, .passport__row, .lh-refs, .team__row");
+  const reveal = document.querySelectorAll(".doc > h2, .doc > h3, .doc > p, .doc > ol, .doc > ul, .table-wrap, .margin-note, .lh-pick, .cards, .passport__row, .lh-refs, .team__row");
   reveal.forEach((el, i) => {
     if (!io) { el.classList.add("is-in"); return; }
     el.classList.add("rv");
@@ -58,7 +58,7 @@
     const toggle = (on) => {
       fig.classList.toggle("is-full", on);
       document.body.style.overflow = on ? "hidden" : "";
-      btn.textContent = on ? "✕ закрыть · Esc" : "⤢ во весь экран";
+      btn.textContent = on ? "✕" : "⤢";
       z = 1; x = 0; y = 0; apply();
     };
     btn.addEventListener("click", () => toggle(!fig.classList.contains("is-full")));

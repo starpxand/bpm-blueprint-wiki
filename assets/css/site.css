@@ -539,3 +539,8 @@ article.doc::before {   /* рамка листа по ГОСТ: 20 мм слев
 .lh-refs li { padding-left: 3em; text-indent: -3em; font-size: 15.5px; }
 .lh-refs li + li { margin-top: 10px; }
 .lh-refs li > a:first-child { display: inline-block; min-width: 2.8em; text-indent: 0; font: 600 14px var(--mono); text-decoration: none; }
+
+/* ---------------------------------------------------------------- пиктограммы элементов в таблицах */
+.doc table img.sym { display: block; height: 46px; width: auto; margin: 2px 0 6px; padding: 3px 6px;
+  background: #fff; border: 1px solid #ddd5c2; border-radius: 5px; }
+.doc td:has(img.sym) { min-width: 128px; }

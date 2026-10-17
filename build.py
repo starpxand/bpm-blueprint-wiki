@@ -18,17 +18,17 @@ import hashlib
 VER = hashlib.sha1(b"".join(f.read_bytes() for f in sorted((ROOT / "assets").glob("*/*.*")) if f.suffix in (".css", ".js"))).hexdigest()[:8]   # сброс кэша при любой правке
 
 NOTATIONS = [  # slug, короткое имя, полное имя, автор листа, вопрос
-    ("flowchart", "Flow Chart", "Блок-схема", "Красношлыков Пётр", "Какие шаги и в каком порядке?"),
+    ("flowchart", "Flow Chart", "Блок-схема", "Попов Андрей", "Какие шаги и в каком порядке?"),
     ("dfd", "DFD", "Диаграмма потоков данных", "Красношлыков Пётр", "Откуда и куда движутся данные?"),
     ("rad", "RAD", "Диаграмма ролей и действий", "Казанцева Ярослава", "Кто что делает и как роли взаимодействуют?"),
     ("idef", "IDEF", "Семейство IDEF0 / IDEF3", "Казанцева Ярослава", "Что делает организация и чем это управляется?"),
     ("erd", "ERD", "Модель «сущность – связь»", "Феклисов Никита", "Какие данные хранить и как они связаны?"),
-    ("uml", "UML", "Унифицированный язык моделирования", "Попов Андрей", "Как устроена и ведёт себя программная система?"),
+    ("uml", "UML", "Унифицированный язык моделирования", "Красношлыков Пётр", "Как устроена и ведёт себя программная система?"),
     ("bpmn", "BPMN", "Нотация бизнес-процессов", "Попов Андрей", "Кто, что, в каком порядке и при каких событиях?"),
 ]
 TEAM = [
-    ("Попов Андрей", "BPMN, UML"),
-    ("Красношлыков Пётр", "Flow Chart, DFD"),
+    ("Попов Андрей", "BPMN, Flow Chart"),
+    ("Красношлыков Пётр", "DFD, UML"),
     ("Казанцева Ярослава", "RAD, IDEF, список источников"),
     ("Феклисов Никита", "ERD, общий пример процесса «Обработка заказа», сравнение и выбор нотации"),
 ]
@@ -349,8 +349,8 @@ def index_page():
         f'<span class="fcap__by"><small>Разраб.</small> {a}</span><span class="fcap__go">Открыть лист →</span></a>'
         for k, (s, short, full, a, q) in enumerate(NOTATIONS))
     ticks = "".join(f'<i data-k="{k}"><b>{k + 1:02d}</b></i>' for k in range(len(NOTATIONS)))
-    team_intro = "".join(f"<span>{n}<i>{r}</i></span>" for (n, _), r in zip(TEAM, ("BPMN · UML", "Flow Chart · DFD", "RAD · IDEF · источники", "ERD · пример · сравнение")))
-    short_roles = ("BPMN · UML", "Flow Chart · DFD", "RAD · IDEF · источники", "ERD · пример · сравнение")
+    team_intro = "".join(f"<span>{n}<i>{r}</i></span>" for (n, _), r in zip(TEAM, ("BPMN · Flow Chart", "DFD · UML", "RAD · IDEF · источники", "ERD · пример · сравнение")))
+    short_roles = ("BPMN · Flow Chart", "DFD · UML", "RAD · IDEF · источники", "ERD · пример · сравнение")
     people = "".join(f'<div class="titleblock__row"><small>Разраб.</small><b>{n}</b><span>{r}</span></div>'
                      for (n, _), r in zip(TEAM, short_roles))
     body = f"""

@@ -1,7 +1,8 @@
 # bpm-blueprint-wiki – заметки для Claude
 
 - Статический сайт «Бюро нотаций»: `python build.py` собирает `content/*.md` в `site/` (site/ в .gitignore, публикует Actions).
-- Тексты в `content/` – копия из командной wiki `D:\Projects\logihub\bpm-modeling-team\docs`; правки содержания вносить в обе.
+- Тексты в `content/` изначально скопированы из командной wiki, теперь ведутся ЗДЕСЬ (старую wiki пользователь велел не переделывать). Пиктограммы элементов: `tools/build_symbols.py` -> assets/sym, `tools/add_symbols.py` вставляет их в таблицы.
+- Роли: Попов – BPMN, Flow Chart; Красношлыков – DFD, UML; Казанцева – RAD, IDEF, источники; Феклисов – ERD, пример, сравнение.
 - Стиль: синька (#0c2340) + бумага (#f7f4ec) + янтарь (#ffb547); шрифты IBM Plex Sans/Mono.
 - Обложка – полёт сквозь 7 листов (flight.js, scroll-scrub); диаграммы на страницах статичные (по просьбе пользователя анимацию по прокрутке убрали), есть полноэкранный просмотр с масштабом.
 - Проверка: локальный сервер `py -m http.server 8765` из site/, кадры – `D:\Projects\logihub\_tools\review.py`.

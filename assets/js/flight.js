@@ -44,17 +44,28 @@
 
     let active = -1;
     sheets.forEach((el, k) => {
-      const rel = -(k + 1) * D + cam + (k === 0 ? (1 - io) * 900 : 0);   // < 0 – лист перед камерой; на заставке первый ближе
+      // полёт
+      const fRel = -(k + 1) * D + cam;                             // < 0 – лист перед камерой
       const side = narrow ? 0 : (k % 2 ? -1 : 1);
-      const dx = narrow ? 0 : innerWidth * 0.12 + (1 - io) * innerWidth * 0.2;   // справа от подписи; на заставке – справа от текста
-      const far = clamp(1 - (-rel - D) / (0.35 * D));             // следующий лист проявляется, когда текущий уходит
-      const near = clamp(1 - (rel + 260) / 420);                  // уход за камеру
-      const op = Math.min(far, near) * (narrow || k > 0 ? io : 1);
+      const fDx = narrow ? 0 : innerWidth * 0.12;                  // справа от подписи
+      const far = clamp(1 - (-fRel - D) / (0.35 * D));             // следующий лист проявляется, когда текущий уходит
+      const near = clamp(1 - (fRel + 260) / 420);                  // уход за камеру
+      const tilt = clamp((fRel + R) / 900, -1, 1);                 // поворачивается, пролетая мимо
+      // заставка: альбом веером справа от заголовка (первый лист сверху)
+      const j = k - 3;
+      const dRel = (narrow ? -1500 : -1300) - k * 110;
+      const dDx = narrow ? j * 18 : innerWidth * 0.335 + j * innerWidth * 0.022;
+      const dDy = Math.abs(j) * (narrow ? 6 : 14) + (narrow ? innerHeight * 0.06 : 0);
+      const e = smooth(io);
+      const lerp = (a, b) => a + (b - a) * e;
+      const rel = lerp(dRel, fRel), dx = lerp(dDx, fDx), dy = lerp(dDy, 0);
+      const rz = lerp(j * 4, 0), ry = lerp(-6 + sx * 6, side * (-4 + tilt * 12) - 6 + sx * 4), rx = lerp(4 - sy * 4, 2 - tilt * 6);
+      const op = lerp(narrow ? 0 : 1 - k * 0.04, Math.min(far, near));   // на телефоне на заставке листов нет – только текст
       el.style.opacity = op.toFixed(3);
       el.style.visibility = op <= 0.01 ? "hidden" : "visible";
+      el.style.zIndex = String(10 - k);
       if (op > 0.01) {
-        const tilt = clamp((rel + R) / 900, -1, 1);                 // поворачивается, пролетая мимо
-        el.style.transform = `translate3d(${dx}px, ${-sy * 30}px, ${rel}px) rotateY(${side * (-4 + tilt * 12) - 6 + sx * 4}deg) rotateX(${2 - tilt * 6}deg) translate(-50%, -50%)`;
+        el.style.transform = `translate3d(${dx}px, ${dy - sy * 30}px, ${rel}px) rotateY(${ry}deg) rotateX(${rx}deg) rotateZ(${rz}deg) translate(-50%, -50%)`;
       }
       const d = Math.abs(s - (k + 0.5));
       const c = clamp(1 - (d - 0.22) / 0.16);

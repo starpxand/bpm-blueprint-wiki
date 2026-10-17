@@ -385,15 +385,7 @@ def index_page():
       роли, функции, структуру базы, программную систему или сквозной процесс целиком.</p>
     </div>
     <div class="story__stage">
-      <svg class="route" viewBox="0 0 640 640" role="img" aria-label="Маршрут заказа от клиента до доставки">
-        <defs><pattern id="mm" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M16 0H0V16" fill="none" stroke="currentColor" stroke-width=".4" opacity=".25"/></pattern></defs>
-        <rect width="640" height="640" fill="url(#mm)"/>
-        <path class="route__ghost" d="M90 90 H540 Q560 90 560 110 V230 Q560 250 540 250 H110 Q90 250 90 270 V390 Q90 410 110 410 H540 Q560 410 560 430 V550"/>
-        <path class="route__line" id="routePath" d="M90 90 H540 Q560 90 560 110 V230 Q560 250 540 250 H110 Q90 250 90 270 V390 Q90 410 110 410 H540 Q560 410 560 430 V550"/>
-        <g class="route__stations"></g>
-        <g class="route__fan"></g>
-        <g class="parcel" transform="translate(90 90)"><rect x="-14" y="-12" width="28" height="24" rx="3"/><path d="M-14 -4H14M0 -12V12"/></g>
-      </svg>
+      <svg class="route" viewBox="0 0 760 520" role="img" aria-label="Карта процесса обработки заказа: дорожки клиента, менеджера, склада и службы доставки"></svg>
       <p class="story__hint">прокрутите, чтобы провести заказ по процессу</p>
     </div>
   </div>

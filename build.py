@@ -26,10 +26,10 @@ NOTATIONS = [  # slug, короткое имя, полное имя, автор 
     ("bpmn", "BPMN", "Нотация бизнес-процессов", "Попов Андрей", "Кто, что, в каком порядке и при каких событиях?"),
 ]
 TEAM = [
-    ("Попов Андрей", "BPMN, UML, сравнение и выбор нотации"),
+    ("Попов Андрей", "BPMN, UML"),
     ("Красношлыков Пётр", "Flow Chart, DFD"),
     ("Казанцева Ярослава", "RAD, IDEF, список источников"),
-    ("Феклисов Никита", "ERD, общий пример процесса «Обработка заказа»"),
+    ("Феклисов Никита", "ERD, общий пример процесса «Обработка заказа», сравнение и выбор нотации"),
 ]
 HERO_IMG = {"flowchart": "hero_flowchart.svg", "dfd": "dfd_level1.svg", "rad": "rad.svg", "idef": "idef0_a0.svg",
             "erd": "hero_erd.svg", "uml": "uml_activity.svg", "bpmn": "bpmn_order.svg"}   # листы альбома на обложке
@@ -277,7 +277,7 @@ def comparison_page():
     md = re.sub(r"^# .+\n", "", md, count=1, flags=re.M)
     md = md.replace('href="../notations/', 'href="notations/').replace('/">Открыть', '.html">Открыть')
     body = md_to_html(md)
-    body, _ = sheets(body, "Сравнение", "команда проекта")
+    body, _ = sheets(body, "Сравнение", "Феклисов Никита")
     body = decorate(body)
     hero = """<section class="sheet-hero sheet-hero--plain"><div class="sheet-hero__in">
 <p class="kicker">Сводный лист · итог</p><h1>Сравнение и выбор нотации</h1>
@@ -340,36 +340,48 @@ def index_page():
   <span class="card__by">{a}</span>
 </a>""" for k, (s, short, full, a, q) in enumerate(NOTATIONS))
     team = "".join(f'<div class="team__row"><b>{n}</b><span>{r}</span></div>' for n, r in TEAM)
-    plates = "".join(
-        f'<a class="plate" href="notations/{s}.html" style="--k:{k}" tabindex="-1">'
-        f'<span class="plate__paper"><img src="assets/img/{HERO_IMG[s]}" alt="" decoding="async"></span>'
-        f'<span class="plate__tag"><b>{k + 1:02d}</b>{short}</span></a>'
+    sheets_html = "".join(
+        f'<a class="fsheet" href="notations/{s}.html" data-k="{k}" tabindex="-1" aria-hidden="true">'
+        f'<span class="fsheet__paper"><img src="assets/img/{HERO_IMG[s]}" alt="" decoding="async"></span>'
+        f'<span class="fsheet__tag"><b>{k + 1:02d}</b>{short}</span></a>'
         for k, (s, short, *_) in enumerate(NOTATIONS))
-    short_roles = ("BPMN · UML · сравнение", "Flow Chart · DFD", "RAD · IDEF · источники", "ERD · общий пример")
+    caps = "".join(
+        f'<a class="fcap" href="notations/{s}.html" data-k="{k}">'
+        f'<span class="fcap__no">Лист {k + 1:02d} из 07</span><span class="fcap__name">{short}</span>'
+        f'<span class="fcap__full">{full}</span><span class="fcap__q">«{q}»</span>'
+        f'<span class="fcap__by"><small>Разраб.</small> {a}</span><span class="fcap__go">Открыть лист →</span></a>'
+        for k, (s, short, full, a, q) in enumerate(NOTATIONS))
+    ticks = "".join(f'<i data-k="{k}"><b>{k + 1:02d}</b></i>' for k in range(len(NOTATIONS)))
+    short_roles = ("BPMN · UML", "Flow Chart · DFD", "RAD · IDEF · источники", "ERD · пример · сравнение")
     people = "".join(f'<div class="titleblock__row"><small>Разраб.</small><b>{n}</b><span>{r}</span></div>'
                      for (n, _), r in zip(TEAM, short_roles))
     body = f"""
-<section class="cover">
-  <div class="cover__in">
-    <p class="kicker">Проектное задание · ФКТ КнАГУ · 2026</p>
-    <h1>Один процесс –<br><em>семь чертежей</em></h1>
-    <p class="cover__lead">Мини-wiki по методам моделирования бизнес-процессов. Обработка заказа в интернет-магазине
-    начерчена в семи нотациях – Flow Chart, DFD, RAD, IDEF, ERD, UML и BPMN, – и каждая диаграмма
-    прорисовывается прямо при прокрутке страницы.</p>
-    <div class="cover__cta"><a class="btn btn--accent" href="#story">Смотреть процесс ↓</a>
-      <a class="btn" href="notations/flowchart.html">Открыть первый лист</a></div>
-  </div>
-  <div class="cover__scene">
-    <div class="deck" aria-label="Альбом из семи листов">{plates}</div>
-  </div>
-  <div class="titleblock" aria-label="Основная надпись: авторы">
-    <div class="titleblock__people">{people}</div>
-    <div class="titleblock__main">
-      <span class="titleblock__name">Мини-wiki по нотациям моделирования бизнес-процессов</span>
-      <span class="titleblock__nums"><span><b>07</b> нотаций</span><span><b>14</b> диаграмм</span><span><b>21</b> источник</span></span>
-      <span class="titleblock__org">ФКТ ФГБОУ ВО «КнАГУ» · 2026</span>
+<section class="flight" aria-label="Обложка: полёт сквозь альбом из семи листов">
+  <div class="flight__stage">
+    <div class="flight__floor" aria-hidden="true"></div>
+    <div class="flight__horizon" aria-hidden="true"></div>
+    <div class="flight__world">{sheets_html}</div>
+    <div class="flight__intro">
+      <p class="kicker">Проектное задание · ФКТ КнАГУ · 2026</p>
+      <h1>Один процесс –<br><em>семь чертежей</em></h1>
+      <p class="flight__lead">Мини-wiki по методам моделирования бизнес-процессов: обработка заказа в интернет-магазине
+      начерчена в семи нотациях. Прокрутите – и альбом пролетит перед вами лист за листом.</p>
+      <div class="flight__cta"><a class="btn btn--accent" href="#fly" data-fly>Пролететь альбом ↓</a>
+        <a class="btn" href="#story">Пропустить</a></div>
+    </div>
+    <div class="flight__caps">{caps}</div>
+    <div class="flight__meter" aria-hidden="true">{ticks}</div>
+    <div class="flight__frame" aria-hidden="true"></div>
+    <div class="titleblock" aria-label="Основная надпись: авторы">
+      <div class="titleblock__people">{people}</div>
+      <div class="titleblock__main">
+        <span class="titleblock__name">Мини-wiki по нотациям моделирования бизнес-процессов</span>
+        <span class="titleblock__nums"><span><b>07</b> нотаций</span><span><b>14</b> диаграмм</span><span><b>21</b> источник</span></span>
+        <span class="titleblock__org">ФКТ ФГБОУ ВО «КнАГУ» · 2026</span>
+      </div>
     </div>
   </div>
+  <span id="fly" class="flight__anchor"></span>
 </section>
 
 <section class="story" id="story" aria-label="Процесс обработки заказа">
@@ -410,7 +422,7 @@ def index_page():
     <div class="cards">{cards}
       <a class="card card--sum" href="comparison.html" style="--i:7"><span class="card__no">Сводный лист</span>
         <span class="card__name">Сравнение</span><span class="card__full">Матрица возможностей и подбор нотации</span>
-        <span class="card__q">«Какую нотацию выбрать под мой вопрос?»</span><span class="card__by">Попов Андрей</span></a>
+        <span class="card__q">«Какую нотацию выбрать под мой вопрос?»</span><span class="card__by">Феклисов Никита</span></a>
     </div>
   </div>
 </section>
@@ -435,7 +447,7 @@ def index_page():
       <a class="btn" href="{REPO}">Исходный код на GitHub</a></p>
   </div>
 </section>"""
-    (OUT / "index.html").write_text(page("Один процесс – семь чертежей", body, 0, "home", scripts=("scrub", "home", "cover"),
+    (OUT / "index.html").write_text(page("Один процесс – семь чертежей", body, 0, "home", scripts=("scrub", "home", "flight"),
                                          desc="Мини-wiki по методам моделирования бизнес-процессов: Flow Chart, DFD, "
                                               "RAD, IDEF, ERD, UML, BPMN – описание, элементы, правила, пример и "
                                               "источники на одном общем процессе"), encoding="utf-8")

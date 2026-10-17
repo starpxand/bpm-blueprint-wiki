@@ -22,7 +22,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-padding-top: calc(var(--top) + 16px); -webkit-text-size-adjust: 100%; }
+html { scroll-padding-top: calc(var(--top) + 72px); -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   font: 400 17px/1.65 var(--sans);
@@ -119,9 +119,9 @@ img, svg { max-width: 100%; }
 /* листы в пространстве */
 .flight__world { position: absolute; inset: 0; z-index: 1; transform-style: preserve-3d; pointer-events: none; }
 .fsheet {
-  --w: min(58vw, 1040px);
-  position: absolute; left: calc(50% - var(--w) / 2 + var(--dx, 0px)); top: calc(44% - var(--w) / 3);
-  width: var(--w); aspect-ratio: 1.5; display: block; text-decoration: none;
+  position: absolute; left: 50%; top: 47%;
+  width: min(54vw, 980px, calc((100svh - var(--top) - 150px) * var(--ar, 1.5)));
+  aspect-ratio: var(--ar, 1.5); display: block; text-decoration: none;
   opacity: 0; will-change: transform, opacity; pointer-events: auto;
 }
 .fsheet__paper {
@@ -188,10 +188,6 @@ img, svg { max-width: 100%; }
   position: absolute; z-index: 3; inset: 12px 12px 12px 30px; pointer-events: none;
   border: 1.5px solid rgba(143, 211, 255, .55);
 }
-.flight__frame::before {   /* графа в верхнем левом углу, как на формате */
-  content: ""; position: absolute; left: 0; top: 0; width: 120px; height: 26px;
-  border-right: 1.5px solid rgba(143, 211, 255, .55); border-bottom: 1.5px solid rgba(143, 211, 255, .55);
-}
 .titleblock {
   position: absolute; z-index: 6; right: 12px; bottom: 12px;
   display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
@@ -219,7 +215,7 @@ html:not(.js-scrub) .flight__stage { height: auto; min-height: 0; perspective: n
 html:not(.js-scrub) .flight__intro { position: relative; top: 0; }
 html:not(.js-scrub) .flight__world { position: relative; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;
   padding: 32px max(16px, calc((100vw - var(--wrap)) / 2)); }
-html:not(.js-scrub) .fsheet { position: relative; left: auto; top: auto; --w: 100%; opacity: 1; }
+html:not(.js-scrub) .fsheet { position: relative; left: auto; top: auto; width: 100%; aspect-ratio: 1.5; opacity: 1; }
 html:not(.js-scrub) .flight__caps, html:not(.js-scrub) .flight__meter, html:not(.js-scrub) .flight__floor { display: none; }
 
 /* ---------------------------------------------------------------- история (scroll-scrub) */
@@ -420,8 +416,6 @@ article.doc::before {   /* рамка листа по ГОСТ: 20 мм слев
 /* появление блоков при входе в экран (один раз, по времени, не по прокрутке) */
 .rv { opacity: 0; transform: translateY(18px); transition: opacity .6s cubic-bezier(.2, .7, .2, 1), transform .6s cubic-bezier(.2, .7, .2, 1); }
 .rv.is-in { opacity: 1; transform: none; }
-.doc > h2.rv::after { content: ""; display: block; height: 2px; background: var(--red); width: 0; transition: width .8s .2s; position: relative; top: 8px; }
-.doc > h2.rv.is-in::after { width: 64px; }
 .table-wrap.rv tbody tr { opacity: 0; transform: translateX(-8px); transition: opacity .4s var(--d, 0ms), transform .4s var(--d, 0ms); }
 .table-wrap.rv.is-in tbody tr { opacity: 1; transform: none; }
 .doc tbody tr { transition: background .15s; }
@@ -474,7 +468,7 @@ article.doc::before {   /* рамка листа по ГОСТ: 20 мм слев
   .flight__intro { top: 5%; right: 16px; }
   .flight__intro h1 { white-space: normal; }
   .flight__lead { font-size: 15px; }
-  .fsheet { --w: 92vw; left: 4vw !important; top: 30%; }
+  .fsheet { width: min(92vw, calc(46svh * var(--ar, 1.5))); top: 40%; }
   .fcap { top: auto; bottom: 150px; left: 16px; right: 16px; width: auto; transform: none; padding: 12px 14px; gap: 3px; }
   .fcap__name { font-size: 28px; }
   .fcap__q { font-size: 15px; margin-top: 2px; }

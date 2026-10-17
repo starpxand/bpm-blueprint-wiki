@@ -32,8 +32,8 @@ TEAM = [
     ("Казанцева Ярослава", "RAD, IDEF, список источников"),
     ("Феклисов Никита", "ERD, общий пример процесса «Обработка заказа», сравнение и выбор нотации"),
 ]
-HERO_IMG = {"flowchart": "hero_flowchart.svg", "dfd": "dfd_level1.svg", "rad": "rad.svg", "idef": "idef0_a0.svg",
-            "erd": "hero_erd.svg", "uml": "uml_activity.svg", "bpmn": "bpmn_order.svg"}   # листы альбома на обложке
+HERO_IMG = {"flowchart": "hero_flowchart", "dfd": "dfd_level1", "rad": "rad", "idef": "idef0_a0",
+            "erd": "hero_erd", "uml": "uml_activity", "bpmn": "bpmn_order"}   # листы обложки – assets/hero/*.webp (растр: 3D-сцена не растрирует SVG каждый кадр)
 TEAM_WIKI = "https://starpxand.github.io/bpm-modeling-wiki/"
 SITE = "https://starpxand.github.io/bpm-blueprint-wiki/"
 REPO = "https://github.com/starpxand/bpm-blueprint-wiki"
@@ -333,9 +333,13 @@ def index_page():
   <span class="card__by">{a}</span>
 </a>""" for k, (s, short, full, a, q) in enumerate(NOTATIONS))
     team = "".join(f'<div class="team__row"><b>{n}</b><span>{r}</span></div>' for n, r in TEAM)
+    def ar(name):
+        from PIL import Image
+        w, h = Image.open(ROOT / "assets" / "hero" / f"{name}.webp").size
+        return max(0.68, min(2.1, w / h * 1.06))
     sheets_html = "".join(
-        f'<a class="fsheet" href="notations/{s}.html" data-k="{k}" tabindex="-1" aria-hidden="true">'
-        f'<span class="fsheet__paper"><img src="assets/img/{HERO_IMG[s]}" alt="" decoding="async"></span>'
+        f'<a class="fsheet" href="notations/{s}.html" data-k="{k}" tabindex="-1" aria-hidden="true" style="--ar:{ar(HERO_IMG[s]):.3f}">'
+        f'<span class="fsheet__paper"><img src="assets/hero/{HERO_IMG[s]}.webp" alt="" decoding="async"></span>'
         f'<span class="fsheet__tag"><b>{k + 1:02d}</b>{short}</span></a>'
         for k, (s, short, *_) in enumerate(NOTATIONS))
     caps = "".join(

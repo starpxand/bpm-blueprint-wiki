@@ -31,6 +31,8 @@ TEAM = [
     ("Казанцева Ярослава", "RAD, IDEF, список источников"),
     ("Феклисов Никита", "ERD, общий пример процесса «Обработка заказа»"),
 ]
+HERO_IMG = {"flowchart": "hero_flowchart.svg", "dfd": "dfd_level1.svg", "rad": "rad.svg", "idef": "idef0_a0.svg",
+            "erd": "hero_erd.svg", "uml": "uml_activity.svg", "bpmn": "bpmn_order.svg"}   # листы альбома на обложке
 TEAM_WIKI = "https://starpxand.github.io/bpm-modeling-wiki/"
 SITE = "https://starpxand.github.io/bpm-blueprint-wiki/"
 REPO = "https://github.com/starpxand/bpm-blueprint-wiki"
@@ -338,10 +340,18 @@ def index_page():
   <span class="card__by">{a}</span>
 </a>""" for k, (s, short, full, a, q) in enumerate(NOTATIONS))
     team = "".join(f'<div class="team__row"><b>{n}</b><span>{r}</span></div>' for n, r in TEAM)
+    plates = "".join(
+        f'<a class="plate" href="notations/{s}.html" style="--k:{k}" tabindex="-1">'
+        f'<span class="plate__paper"><img src="assets/img/{HERO_IMG[s]}" alt="" decoding="async"></span>'
+        f'<span class="plate__tag"><b>{k + 1:02d}</b>{short}</span></a>'
+        for k, (s, short, *_) in enumerate(NOTATIONS))
+    short_roles = ("BPMN · UML · сравнение", "Flow Chart · DFD", "RAD · IDEF · источники", "ERD · общий пример")
+    people = "".join(f'<div class="titleblock__row"><small>Разраб.</small><b>{n}</b><span>{r}</span></div>'
+                     for (n, _), r in zip(TEAM, short_roles))
     body = f"""
 <section class="cover">
   <div class="cover__in">
-    <p class="kicker">Проектное задание · «Современные программные средства» · ФКТ КнАГУ</p>
+    <p class="kicker">Проектное задание · ФКТ КнАГУ · 2026</p>
     <h1>Один процесс –<br><em>семь чертежей</em></h1>
     <p class="cover__lead">Мини-wiki по методам моделирования бизнес-процессов. Обработка заказа в интернет-магазине
     начерчена в семи нотациях – Flow Chart, DFD, RAD, IDEF, ERD, UML и BPMN, – и каждая диаграмма
@@ -349,8 +359,16 @@ def index_page():
     <div class="cover__cta"><a class="btn btn--accent" href="#story">Смотреть процесс ↓</a>
       <a class="btn" href="notations/flowchart.html">Открыть первый лист</a></div>
   </div>
-  <div class="cover__stamp">
-    <span><b>07</b> нотаций</span><span><b>14</b> диаграмм</span><span><b>21</b> источник</span><span><b>04</b> автора</span>
+  <div class="cover__scene">
+    <div class="deck" aria-label="Альбом из семи листов">{plates}</div>
+  </div>
+  <div class="titleblock" aria-label="Основная надпись: авторы">
+    <div class="titleblock__people">{people}</div>
+    <div class="titleblock__main">
+      <span class="titleblock__name">Мини-wiki по нотациям моделирования бизнес-процессов</span>
+      <span class="titleblock__nums"><span><b>07</b> нотаций</span><span><b>14</b> диаграмм</span><span><b>21</b> источник</span></span>
+      <span class="titleblock__org">ФКТ ФГБОУ ВО «КнАГУ» · 2026</span>
+    </div>
   </div>
 </section>
 
@@ -417,7 +435,7 @@ def index_page():
       <a class="btn" href="{REPO}">Исходный код на GitHub</a></p>
   </div>
 </section>"""
-    (OUT / "index.html").write_text(page("Один процесс – семь чертежей", body, 0, "home", scripts=("scrub", "home"),
+    (OUT / "index.html").write_text(page("Один процесс – семь чертежей", body, 0, "home", scripts=("scrub", "home", "cover"),
                                          desc="Мини-wiki по методам моделирования бизнес-процессов: Flow Chart, DFD, "
                                               "RAD, IDEF, ERD, UML, BPMN – описание, элементы, правила, пример и "
                                               "источники на одном общем процессе"), encoding="utf-8")

@@ -32,6 +32,7 @@ TEAM = [
     ("Феклисов Никита", "ERD, общий пример процесса «Обработка заказа»"),
 ]
 TEAM_WIKI = "https://starpxand.github.io/bpm-modeling-wiki/"
+SITE = "https://starpxand.github.io/bpm-blueprint-wiki/"
 REPO = "https://github.com/starpxand/bpm-blueprint-wiki"
 
 
@@ -181,8 +182,9 @@ def footer(depth):
 </footer>"""
 
 
-def page(title, body, depth=0, active="", desc="", scripts=("scrub",), mermaid=False, extra_head=""):
+def page(title, body, depth=0, active="", desc="", scripts=("scrub",), mermaid=False, extra_head="", path=""):
     pre = "../" * depth
+    desc = desc or "Мини-wiki по нотациям моделирования бизнес-процессов: Flow Chart, DFD, RAD, IDEF, ERD, UML, BPMN"
     js = "".join(f'<script src="{pre}assets/js/{s}.js?v={VER}" defer></script>' for s in scripts)
     mm = (f'<script type="module" src="{pre}assets/js/mermaid-init.js?v={VER}"></script>' if mermaid else "")
     return f"""<!doctype html>
@@ -191,7 +193,18 @@ def page(title, body, depth=0, active="", desc="", scripts=("scrub",), mermaid=F
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(title)} · Бюро нотаций</title>
-<meta name="description" content="{html.escape(desc or 'Мини-wiki по нотациям моделирования бизнес-процессов: Flow Chart, DFD, RAD, IDEF, ERD, UML, BPMN')}">
+<meta name="description" content="{html.escape(desc)}">
+<link rel="canonical" href="{SITE}{path}">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Бюро нотаций">
+<meta property="og:title" content="{html.escape(title)}">
+<meta property="og:description" content="{html.escape(desc)}">
+<meta property="og:url" content="{SITE}{path}">
+<meta property="og:image" content="{SITE}assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0c2340">
+<script>if (!matchMedia("(prefers-reduced-motion: reduce)").matches) document.documentElement.classList.add("js-scrub");</script>
 <link rel="icon" href="{pre}assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -251,7 +264,7 @@ def notation_page(i, slug, short, full, author, question):
 </section>"""
     article = f'<article class="doc">{body}</article>{pager}'
     out = page(title, hero + article, 1, slug, desc=f"{title}: описание, элементы нотации, правила составления, пример, источники",
-               mermaid="mermaid" in body)
+               mermaid="mermaid" in body, path=f"notations/{slug}.html")
     (OUT / "notations" / f"{slug}.html").write_text(out, encoding="utf-8")
     return n
 
@@ -269,18 +282,31 @@ def comparison_page():
 <p class="sheet-hero__q">Универсальной нотации нет – каждая отвечает на свой вопрос.</p></div></section>"""
     (OUT / "comparison.html").write_text(
         page("Сравнение и выбор нотации", hero + f'<article class="doc">{body}</article>', 0, "comparison",
-             scripts=("scrub", "pick"), mermaid=True), encoding="utf-8")
+             scripts=("scrub", "pick"), mermaid=True, path="comparison.html",
+             desc="Сравнение нотаций Flow Chart, DFD, RAD, IDEF, ERD, UML и BPMN: матрица возможностей и подбор нотации под вопрос"),
+        encoding="utf-8")
 
 
 def sources_page():
     md = (CONTENT / "sources.md").read_text(encoding="utf-8")
     md = re.sub(r"^# .+\n", "", md, count=1, flags=re.M)
+    # таблица инструментов в командной wiki описывает её сборку – здесь своя
+    md = re.sub(r"^\| DFD, RAD, IDEF0, IDEF3, UML \(деятельность\) \|.*$",
+                "| DFD, RAD, IDEF0, IDEF3, UML (деятельность) | векторная графика SVG, построенная по правилам нотаций |",
+                md, flags=re.M)
+    md = re.sub(r"^\| BPMN \|.*$",
+                "| BPMN | модель BPMN 2.0 построена в редакторе bpmn-js [[5]](#src-5) и экспортирована в SVG |", md, flags=re.M)
+    md += ("\n## Как устроен этот сайт\n\nСтраницы собираются из тех же текстов, что и командная мини-wiki на MkDocs, "
+           "скриптом `build.py`; каждый лист-диаграмма закрепляется на экране и прорисовывается синхронно с прокруткой "
+           f"(scroll-scrub). Исходный код: <{REPO}>.\n")
     body = decorate(md_to_html(md))
     hero = """<section class="sheet-hero sheet-hero--plain"><div class="sheet-hero__in">
 <p class="kicker">Спецификация к чертежам</p><h1>Источники</h1>
 <p class="sheet-hero__q">21 источник: стандарты, книги, спецификации и справочные сайты.</p></div></section>"""
     (OUT / "sources.html").write_text(page("Источники", hero + f'<article class="doc doc--sources">{body}</article>',
-                                           0, "sources", scripts=("scrub",)), encoding="utf-8")
+                                           0, "sources", scripts=("scrub",), path="sources.html",
+                                           desc="Список источников мини-wiki по нотациям моделирования бизнес-процессов"),
+                                      encoding="utf-8")
 
 
 # ------------------------------------------------------------------ главная
@@ -323,8 +349,8 @@ def index_page():
     <div class="cover__cta"><a class="btn btn--accent" href="#story">Смотреть процесс ↓</a>
       <a class="btn" href="notations/flowchart.html">Открыть первый лист</a></div>
   </div>
-  <div class="cover__stamp" aria-hidden="true">
-    <span>Формат А1</span><span>Масштаб 1:1</span><span>Листов 07</span><span>2026</span>
+  <div class="cover__stamp">
+    <span><b>07</b> нотаций</span><span><b>14</b> диаграмм</span><span><b>21</b> источник</span><span><b>04</b> автора</span>
   </div>
 </section>
 
@@ -345,7 +371,7 @@ def index_page():
         <path class="route__line" id="routePath" d="M90 90 H540 Q560 90 560 110 V230 Q560 250 540 250 H110 Q90 250 90 270 V390 Q90 410 110 410 H540 Q560 410 560 430 V550"/>
         <g class="route__stations"></g>
         <g class="route__fan"></g>
-        <g class="parcel"><rect x="-14" y="-12" width="28" height="24" rx="3"/><path d="M-14 -4H14M0 -12V12"/></g>
+        <g class="parcel" transform="translate(90 90)"><rect x="-14" y="-12" width="28" height="24" rx="3"/><path d="M-14 -4H14M0 -12V12"/></g>
       </svg>
       <p class="story__hint">прокрутите, чтобы провести заказ по процессу</p>
     </div>
@@ -385,14 +411,34 @@ def index_page():
     <p class="kicker">Основная надпись альбома</p>
     <h2>Разработали</h2>
     <div class="team__stamp">{team}
-      <div class="team__row team__row--org"><b>ФКТ ФГБОУ ВО «КнАГУ»</b><span>группа 5ИТб-2 · 2026 · все участники равноправны</span></div>
+      <div class="team__row team__row--org"><b>ФКТ ФГБОУ ВО «КнАГУ»</b><span>«Современные программные средства» · 2026 · все участники равноправны</span></div>
     </div>
     <p class="team__links"><a class="btn" href="{TEAM_WIKI}">Командная wiki на MkDocs</a>
       <a class="btn" href="{REPO}">Исходный код на GitHub</a></p>
   </div>
 </section>"""
-    (OUT / "index.html").write_text(page("Один процесс – семь чертежей", body, 0, "home", scripts=("scrub", "home")),
-                                    encoding="utf-8")
+    (OUT / "index.html").write_text(page("Один процесс – семь чертежей", body, 0, "home", scripts=("scrub", "home"),
+                                         desc="Мини-wiki по методам моделирования бизнес-процессов: Flow Chart, DFD, "
+                                              "RAD, IDEF, ERD, UML, BPMN – описание, элементы, правила, пример и "
+                                              "источники на одном общем процессе"), encoding="utf-8")
+
+
+def service_pages():
+    """404, sitemap.xml, robots.txt."""
+    body = f"""<section class="sheet-hero sheet-hero--plain"><div class="sheet-hero__in">
+<p class="kicker">Ошибка 404 · лист не найден</p><h1>Такого листа в альбоме нет</h1>
+<p class="sheet-hero__q">Возможно, ссылка устарела. Начните с обложки или выберите нотацию в меню.</p>
+<p><a class="btn btn--accent" href="{SITE}">На главную</a></p></div></section>"""
+    out = page("Страница не найдена", body, 0, "", scripts=())
+    out = out.replace('href="assets/', f'href="{SITE}assets/').replace('href="notations/', f'href="{SITE}notations/')
+    out = out.replace('href="comparison.html"', f'href="{SITE}comparison.html"').replace(
+        'href="sources.html"', f'href="{SITE}sources.html"').replace('href="index.html"', f'href="{SITE}"')
+    (OUT / "404.html").write_text(out, encoding="utf-8")
+    urls = [""] + [f"notations/{n[0]}.html" for n in NOTATIONS] + ["comparison.html", "sources.html"]
+    (OUT / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        + "".join(f"  <url><loc>{SITE}{u}</loc></url>\n" for u in urls) + "</urlset>\n", encoding="utf-8")
+    (OUT / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE}sitemap.xml\n", encoding="utf-8")
 
 
 # ------------------------------------------------------------------ сборка
@@ -406,6 +452,7 @@ def main():
     comparison_page()
     sources_page()
     index_page()
+    service_pages()
     (OUT / ".nojekyll").write_text("")
     print(f"site/: {len(NOTATIONS)} листов нотаций, {total} диаграмм-листов")
 

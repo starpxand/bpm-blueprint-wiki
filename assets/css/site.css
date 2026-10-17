@@ -542,8 +542,8 @@ article.doc::before {   /* рамка листа по ГОСТ: 20 мм слев
 .lh-refs li > a:first-child { display: inline-block; min-width: 2.8em; text-indent: 0; font: 600 14px var(--mono); text-decoration: none; }
 
 /* ---------------------------------------------------------------- пиктограммы элементов в таблицах */
-.doc table img.sym { display: block; height: 46px; width: auto; margin: 2px 0 6px; padding: 3px 6px;
-  background: #fff; border: 1px solid #ddd5c2; border-radius: 5px; }
-.doc td:has(img.sym) { min-width: 128px; }
+.doc table img.sym { display: block; height: 84px; width: auto; margin: 2px 0 8px; padding: 6px 10px;
+  background: #fff; border: 1px solid #ddd5c2; border-radius: 6px; }
+.doc td:has(img.sym) { min-width: 200px; }
 /* Mermaid – в натуральную величину (высокие схемы не сжимаются до высоты экрана) */
 .sheet__draw .mermaid svg { max-height: none; width: auto; height: auto; }

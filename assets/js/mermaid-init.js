@@ -21,9 +21,11 @@ mermaid.initialize({
     signalColor: "#142238",
     labelBoxBkgColor: "#efeadd",
   },
-  flowchart: { curve: "basis", padding: 12 },
+  flowchart: { curve: "basis", padding: 12, nodeSpacing: 34, rankSpacing: 38 },
   er: { layoutDirection: "LR" },
 });
 
+await document.fonts.ready;   // иначе Mermaid меряет подписи старым шрифтом и обрезает их
+await Promise.all(["400 15px \"IBM Plex Sans\"", "600 15px \"IBM Plex Sans\""].map((f) => document.fonts.load(f)));
 await mermaid.run({ querySelector: "pre.mermaid" });
 document.dispatchEvent(new Event("mermaid:rendered"));

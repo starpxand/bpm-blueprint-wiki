@@ -27,10 +27,10 @@ NOTATIONS = [  # slug, короткое имя, полное имя, автор 
     ("bpmn", "BPMN", "Нотация бизнес-процессов", "Попов Андрей", "Кто, что, в каком порядке и при каких событиях?"),
 ]
 TEAM = [
-    ("Попов Андрей", "BPMN, Flow Chart"),
-    ("Красношлыков Пётр", "DFD, UML"),
+    ("Попов Андрей", "BPMN, Flow Chart, UML: диаграмма последовательности"),
+    ("Красношлыков Пётр", "DFD, UML: описание, диаграммы деятельности и состояний"),
     ("Казанцева Ярослава", "RAD, IDEF, список источников"),
-    ("Феклисов Никита", "ERD, общий пример процесса «Обработка заказа», сравнение и выбор нотации"),
+    ("Феклисов Никита", "ERD, UML: диаграмма классов, общий пример процесса «Обработка заказа», сравнение и выбор нотации"),
 ]
 HERO_IMG = {"flowchart": "hero_flowchart", "dfd": "dfd_level1", "rad": "rad", "idef": "idef0_a0",
             "erd": "hero_erd", "uml": "uml_activity", "bpmn": "bpmn_order"}   # листы обложки – assets/hero/*.webp (растр: 3D-сцена не растрирует SVG каждый кадр)
@@ -104,6 +104,13 @@ def sheet(inner, caption, notation, author, n_sheet, kind="svg"):
 </section>"""
 
 
+CO_AUTHORS = {"uml": "; диаграммы последовательности – Попов Андрей, классов – Феклисов Никита"}
+DIAGRAM_AUTHOR = {   # диаграммы распределены поровну: у каждого 3–4 из 14
+    "Диаграмма последовательности": "Попов Андрей",
+    "Диаграмма классов": "Феклисов Никита",
+}
+
+
 def sheets(body, notation, author):
     """<img src=*.svg> и <pre class=mermaid> -> листы со штампом; заголовок листа – подпись или ближайший h3/h2."""
     count = [0]
@@ -126,7 +133,7 @@ def sheets(body, notation, author):
             cap = re.sub(r"<.*?>", "", hs[-1]) if hs else notation
             if cap.lower().startswith("пример") or cap.lower().startswith("как выбрать"):
                 cap = {"Flow Chart": "Блок-схема обработки заказа", "ERD": "ERD – данные интернет-магазина"}.get(notation, cap)
-            res.append(sheet(part, cap, notation, author, nxt(), "mermaid"))
+            res.append(sheet(part, cap, notation, DIAGRAM_AUTHOR.get(cap, author), nxt(), "mermaid"))
         else:
             res.append(part)
     body = "".join(res)
@@ -253,7 +260,7 @@ def notation_page(i, slug, short, full, author, question):
     <h1>{html.escape(title)}</h1>
     <p class="sheet-hero__q">«{html.escape(question)}»</p>
     <div class="passport">{passport}
-      <div class="passport__row"><span>Лист подготовил(а)</span><b>{html.escape(author)}</b></div></div>
+      <div class="passport__row"><span>Лист подготовил(а)</span><b>{html.escape(author)}{CO_AUTHORS.get(slug, "")}</b></div></div>
   </div>
 </section>
 <nav class="toc" aria-label="Разделы листа">{toc}</nav>"""
@@ -349,8 +356,8 @@ def index_page():
         f'<span class="fcap__by"><small>Разраб.</small> {a}</span><span class="fcap__go">Открыть лист →</span></a>'
         for k, (s, short, full, a, q) in enumerate(NOTATIONS))
     ticks = "".join(f'<i data-k="{k}"><b>{k + 1:02d}</b></i>' for k in range(len(NOTATIONS)))
-    team_intro = "".join(f"<span>{n}<i>{r}</i></span>" for (n, _), r in zip(TEAM, ("BPMN · Flow Chart", "DFD · UML", "RAD · IDEF · источники", "ERD · пример · сравнение")))
-    short_roles = ("BPMN · Flow Chart", "DFD · UML", "RAD · IDEF · источники", "ERD · пример · сравнение")
+    team_intro = "".join(f"<span>{n}<i>{r}</i></span>" for (n, _), r in zip(TEAM, ("BPMN · Flow Chart · UML-послед.", "DFD · UML", "RAD · IDEF · источники", "ERD · UML-классы · сравнение")))
+    short_roles = ("BPMN · Flow Chart · UML-послед.", "DFD · UML", "RAD · IDEF · источники", "ERD · UML-классы · сравнение")
     people = "".join(f'<div class="titleblock__row"><small>Разраб.</small><b>{n}</b><span>{r}</span></div>'
                      for (n, _), r in zip(TEAM, short_roles))
     body = f"""

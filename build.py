@@ -434,7 +434,7 @@ def index_page():
     <p class="kicker">Основная надпись альбома</p>
     <h2>Разработали</h2>
     <div class="team__stamp">{team}
-      <div class="team__row team__row--org"><b>ФКТ ФГБОУ ВО «КнАГУ»</b><span>«Современные программные средства» · 2026 · все участники равноправны</span></div>
+      <div class="team__row team__row--org"><b>ФКТ ФГБОУ ВО «КнАГУ»</b><span>«Современные программные средства» · 2026</span></div>
     </div>
     <p class="team__links"><a class="btn" href="{TEAM_WIKI}">Командная wiki на MkDocs</a>
       <a class="btn" href="{REPO}">Исходный код на GitHub</a></p>

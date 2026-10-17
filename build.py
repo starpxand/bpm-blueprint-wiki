@@ -300,8 +300,8 @@ def sources_page():
     md = re.sub(r"^\| BPMN \|.*$",
                 "| BPMN | модель BPMN 2.0 построена в редакторе bpmn-js [[5]](#src-5) и экспортирована в SVG |", md, flags=re.M)
     md += ("\n## Как устроен этот сайт\n\nСтраницы собираются из тех же текстов, что и командная мини-wiki на MkDocs, "
-           "скриптом `build.py`; обложка – полёт сквозь альбом листов, управляемый прокруткой, "
-           f"(scroll-scrub). Исходный код: <{REPO}>.\n")
+           "скриптом `build.py`; обложка – полёт сквозь альбом листов, управляемый прокруткой (scroll-scrub), "
+           f"диаграммы открываются во весь экран с масштабом. Исходный код: <{REPO}>.\n")
     body = decorate(md_to_html(md))
     hero = """<section class="sheet-hero sheet-hero--plain"><div class="sheet-hero__in">
 <p class="kicker">Спецификация к чертежам</p><h1>Источники</h1>

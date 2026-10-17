@@ -15,7 +15,6 @@
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
   const smooth = (t) => t * t * (3 - 2 * t);
   let mx = 0, my = 0, sx = 0, sy = 0, ticking = false, sCur = null;
-  const tb = sec.querySelector(".titleblock");
 
   // камера: равномерный полёт с «зависанием» на середине каждого сегмента
   const camAt = (s) => {
@@ -42,14 +41,12 @@
     intro.style.opacity = 1 - io;
     intro.style.transform = `translate3d(0, ${-io * 60}px, 0)`;
     intro.style.pointerEvents = io > 0.6 ? "none" : "";
-    tb.style.opacity = (1 - io).toFixed(3);
-    tb.style.pointerEvents = io > 0.6 ? "none" : "";
 
     let active = -1;
     sheets.forEach((el, k) => {
-      const rel = -(k + 1) * D + cam + (k === 0 ? (1 - io) * 650 : 0);   // < 0 – лист перед камерой; на заставке первый ближе
+      const rel = -(k + 1) * D + cam + (k === 0 ? (1 - io) * 900 : 0);   // < 0 – лист перед камерой; на заставке первый ближе
       const side = narrow ? 0 : (k % 2 ? -1 : 1);
-      const dx = narrow ? 0 : innerWidth * 0.12 + (1 - io) * innerWidth * 0.22;   // справа от подписи; на заставке – справа от текста
+      const dx = narrow ? 0 : innerWidth * 0.12 + (1 - io) * innerWidth * 0.2;   // справа от подписи; на заставке – справа от текста
       const far = clamp(1 - (-rel - D) / (0.35 * D));             // следующий лист проявляется, когда текущий уходит
       const near = clamp(1 - (rel + 260) / 420);                  // уход за камеру
       const op = Math.min(far, near) * (narrow || k > 0 ? io : 1);

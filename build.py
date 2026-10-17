@@ -349,6 +349,7 @@ def index_page():
         f'<span class="fcap__by"><small>Разраб.</small> {a}</span><span class="fcap__go">Открыть лист →</span></a>'
         for k, (s, short, full, a, q) in enumerate(NOTATIONS))
     ticks = "".join(f'<i data-k="{k}"><b>{k + 1:02d}</b></i>' for k in range(len(NOTATIONS)))
+    team_intro = "".join(f"<span>{n}<i>{r}</i></span>" for (n, _), r in zip(TEAM, ("BPMN · UML", "Flow Chart · DFD", "RAD · IDEF · источники", "ERD · пример · сравнение")))
     short_roles = ("BPMN · UML", "Flow Chart · DFD", "RAD · IDEF · источники", "ERD · пример · сравнение")
     people = "".join(f'<div class="titleblock__row"><small>Разраб.</small><b>{n}</b><span>{r}</span></div>'
                      for (n, _), r in zip(TEAM, short_roles))
@@ -365,18 +366,11 @@ def index_page():
       начерчена в семи нотациях. Прокрутите – и альбом пролетит перед вами лист за листом.</p>
       <div class="flight__cta"><a class="btn btn--accent" href="#fly" data-fly>Пролететь альбом ↓</a>
         <a class="btn" href="#story">Пропустить</a></div>
+      <p class="flight__team"><small>Разработчики</small>{team_intro}</p>
     </div>
     <div class="flight__caps">{caps}</div>
     <div class="flight__meter" aria-hidden="true">{ticks}</div>
     <div class="flight__frame" aria-hidden="true"></div>
-    <div class="titleblock" aria-label="Основная надпись: авторы">
-      <div class="titleblock__people">{people}</div>
-      <div class="titleblock__main">
-        <span class="titleblock__name">Мини-wiki по нотациям моделирования бизнес-процессов</span>
-        <span class="titleblock__nums"><span><b>07</b> нотаций</span><span><b>14</b> диаграмм</span><span><b>21</b> источник</span></span>
-        <span class="titleblock__org">ФКТ ФГБОУ ВО «КнАГУ» · 2026</span>
-      </div>
-    </div>
   </div>
   <span id="fly" class="flight__anchor"></span>
 </section>

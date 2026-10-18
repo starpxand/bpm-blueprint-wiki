@@ -173,6 +173,7 @@ def footer(depth):
     <p>Разработали: {team}.</p>
     <p><a href="{TEAM_WIKI}">Командная мини-wiki (MkDocs)</a> · <a href="{REPO}">Исходный код</a> ·
     <a href="{"../" * depth}sources.html">Источники</a></p>
+    <p class="foot__keys">Клавиша <kbd>?</kbd> – горячие клавиши: <kbd>1</kbd>–<kbd>7</kbd> листы альбома, <kbd>←</kbd> <kbd>→</kbd> соседние листы.</p>
   </div>
 </footer>"""
 
@@ -180,7 +181,7 @@ def footer(depth):
 def page(title, body, depth=0, active="", desc="", scripts=("scrub",), mermaid=False, extra_head="", path=""):
     pre = "../" * depth
     desc = desc or "Мини-wiki по нотациям моделирования бизнес-процессов: Flow Chart, DFD, RAD, IDEF, ERD, UML, BPMN"
-    js = "".join(f'<script src="{pre}assets/js/{s}.js?v={VER}" defer></script>' for s in scripts)
+    js = "".join(f'<script src="{pre}assets/js/{s}.js?v={VER}" defer></script>' for s in ("vendor/lenis.min", "fx", *scripts))
     mm = (f'<script type="module" src="{pre}assets/js/mermaid-init.js?v={VER}"></script>' if mermaid else "")
     return f"""<!doctype html>
 <html lang="ru">
@@ -349,6 +350,7 @@ def index_page():
         f'<span class="fcap__by"><small>Разраб.</small> {a}</span><span class="fcap__go">Открыть лист →</span></a>'
         for k, (s, short, full, a, q) in enumerate(NOTATIONS))
     ticks = "".join(f'<i data-k="{k}"><b>{k + 1:02d}</b></i>' for k in range(len(NOTATIONS)))
+    nums = "".join(f"<span>{k + 1:02d}</span>" for k in range(len(NOTATIONS)))
     team_intro = "".join(f"<span>{n}<i>{r}</i></span>" for (n, _), r in zip(TEAM, ("BPMN · Flow Chart", "DFD · UML", "RAD · IDEF · источники", "ERD · пример · сравнение")))
     short_roles = ("BPMN · Flow Chart", "DFD · UML", "RAD · IDEF · источники", "ERD · пример · сравнение")
     people = "".join(f'<div class="titleblock__row"><small>Разраб.</small><b>{n}</b><span>{r}</span></div>'
@@ -356,6 +358,8 @@ def index_page():
     body = f"""
 <section class="flight" aria-label="Обложка: полёт сквозь альбом из семи листов">
   <div class="flight__stage">
+    <div class="flight__photo" aria-hidden="true"></div>
+    <div class="flight__nums" aria-hidden="true">{nums}</div>
     <div class="flight__floor" aria-hidden="true"></div>
     <div class="flight__horizon" aria-hidden="true"></div>
     <div class="flight__world">{sheets_html}</div>
@@ -369,7 +373,10 @@ def index_page():
       <p class="flight__team"><small>Разработчики</small>{team_intro}</p>
     </div>
     <div class="flight__caps">{caps}</div>
+    <svg class="flight__dims" aria-hidden="true"><path class="dims__lead"/><circle class="dims__dot" r="4"/>
+      <path class="dims__dim"/><text class="dims__txt" text-anchor="middle"></text></svg>
     <div class="flight__meter" aria-hidden="true">{ticks}</div>
+    <div class="flight__cross" aria-hidden="true"><i></i><i></i><b></b></div>
     <div class="flight__frame" aria-hidden="true"></div>
   </div>
   <span id="fly" class="flight__anchor"></span>
@@ -424,6 +431,14 @@ def index_page():
     <p class="kicker">Основная надпись альбома</p>
     <h2>Разработали</h2>
     <div class="team__stamp">{team}
+      <div class="stamp" aria-hidden="true"><svg viewBox="0 0 200 200">
+        <defs><path id="stampRing" d="M100 100 m-74 0 a74 74 0 1 1 148 0 a74 74 0 1 1 -148 0"/>
+          <filter id="stampInk"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7"/>
+            <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -.9 1.25"/><feComposite in="SourceGraphic" operator="in"/></filter></defs>
+        <g filter="url(#stampInk)"><circle cx="100" cy="100" r="94"/><circle cx="100" cy="100" r="62"/>
+          <text class="stamp__ring"><textPath href="#stampRing">БЮРО НОТАЦИЙ · ФКТ КнАГУ · 2026 ·</textPath></text>
+          <text class="stamp__big" x="100" y="99" text-anchor="middle">7 листов</text>
+          <text class="stamp__small" x="100" y="121" text-anchor="middle">1 процесс</text></g></svg></div>
       <div class="team__row team__row--org"><b>ФКТ ФГБОУ ВО «КнАГУ»</b><span>«Современные программные средства» · 2026</span></div>
     </div>
     <p class="team__links"><a class="btn" href="{TEAM_WIKI}">Командная wiki на MkDocs</a>

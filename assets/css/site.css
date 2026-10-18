@@ -479,6 +479,85 @@ article.doc::before {   /* рамка листа по ГОСТ: 20 мм слев
 .foot p { margin: 0 0 8px; }
 
 /* ---------------------------------------------------------------- адаптивность */
+/* ---------------------------------------------------------------- обложка: глубина сцены и чертёжные пометки */
+/* фото чертёжного стола в синьке: заставка «на столе», при взлёте стол уходит вниз */
+.flight__photo {
+  position: absolute; inset: -6%; z-index: 0; pointer-events: none; will-change: transform, opacity;
+  background: linear-gradient(90deg, rgba(12, 35, 64, .96) 0%, rgba(12, 35, 64, .8) 38%, rgba(12, 35, 64, .25) 75%, rgba(12, 35, 64, .5) 100%),
+              linear-gradient(0deg, rgba(12, 35, 64, .9), transparent 40%),
+              url("../hero/desk.webp") 60% 40% / cover no-repeat;
+}
+/* огромный номер текущего листа за сценой */
+.flight__nums { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.flight__nums span {
+  position: absolute; right: calc(var(--fg) + 64px); top: 36%; opacity: 0;
+  font: 700 min(62vh, 40vw)/.8 var(--mono); letter-spacing: -.06em;
+  color: rgba(143, 211, 255, .035); -webkit-text-stroke: 1.5px rgba(143, 211, 255, .34);
+  transform-origin: 100% 50%; will-change: transform, opacity;
+}
+/* блик на бумаге: ползёт по листу вслед за его поворотом */
+.fsheet__paper::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, .55) 50%, transparent 62%) var(--gl, 50%) 0 / 320% 100% no-repeat;
+}
+.fsheet { transition: filter .25s linear; }
+/* выноска и размерная линия */
+.flight__dims { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; opacity: 0; overflow: visible; }
+.dims__lead { fill: none; stroke: var(--amber); stroke-width: 1.4; }
+.dims__dot { fill: var(--amber); }
+.dims__dim { fill: none; stroke: rgba(143, 211, 255, .75); stroke-width: 1.2; }
+.dims__txt { font: 500 14px var(--mono); fill: var(--cyan-2); letter-spacing: .04em; }
+/* перекрестие чертёжника */
+@media (pointer: fine) { .js-scrub .flight__stage { cursor: crosshair; } .js-scrub .flight__stage a { cursor: pointer; } }
+.flight__cross { position: absolute; inset: 0; z-index: 6; pointer-events: none; opacity: 0; transition: opacity .25s; --x: -100px; --y: -100px; }
+.flight__cross.is-on { opacity: 1; }
+.flight__cross i { position: absolute; background: rgba(143, 211, 255, .28); }
+.flight__cross i:first-child { left: 0; right: 0; top: var(--y); height: 1px; }
+.flight__cross i:last-of-type { top: 0; bottom: 0; left: var(--x); width: 1px; }
+.flight__cross b { position: absolute; left: var(--x); top: var(--y); transform: translate(14px, 12px); white-space: nowrap;
+  font: 500 12px var(--mono); color: var(--amber); background: rgba(12, 35, 64, .85); padding: 3px 7px; border: 1px solid rgba(255, 181, 71, .4); }
+.flight__cross b::before { content: ""; position: absolute; left: -20px; top: -18px; width: 11px; height: 11px; border: 1.5px solid var(--amber); border-radius: 50%; }
+
+/* ---------------------------------------------------------------- кнопки: магнит */
+.btn { transition: background .2s, color .2s, transform .35s cubic-bezier(.2, .8, .2, 1); }
+
+/* ---------------------------------------------------------------- горячие клавиши */
+kbd { display: inline-block; min-width: 1.6em; padding: 1px 6px; text-align: center; font: 500 .85em var(--mono); color: var(--ink);
+  background: var(--paper); border-radius: 3px; box-shadow: inset 0 -2px 0 var(--rule); }
+.foot__keys { color: rgba(143, 211, 255, .7); }
+.keys { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; padding: 16px; background: rgba(6, 18, 34, .7);
+  backdrop-filter: blur(4px); opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s; }
+.keys.is-on { opacity: 1; visibility: visible; }
+.keys__box { width: min(560px, 100%); background: var(--desk-2); border: 1.5px solid var(--cyan); padding: 26px 28px 24px; transform: translateY(10px); transition: transform .25s; }
+.keys.is-on .keys__box { transform: none; }
+.keys__t { font: 700 22px var(--sans); color: #fff; margin: 0 0 14px; }
+.keys dl { display: grid; grid-template-columns: max-content 1fr; gap: 10px 18px; margin: 0 0 20px; }
+.keys dt { color: var(--cyan-2); white-space: nowrap; } .keys dd { margin: 0; color: var(--cyan); }
+.keys .btn { background: transparent; cursor: pointer; }
+.keys .btn:hover { background: var(--cyan); color: var(--desk); }
+
+/* ---------------------------------------------------------------- печать бюро */
+.team__stamp { position: relative; }
+.stamp { position: absolute; right: 18px; top: -78px; width: 172px; height: 172px; z-index: 2; pointer-events: none; opacity: 0; transform: rotate(-14deg) scale(2.6); }
+.stamp svg { width: 100%; height: 100%; overflow: visible; }
+.stamp circle { fill: none; stroke: #ec6a52; stroke-width: 4; }
+.stamp circle + circle { stroke-width: 2; }
+.stamp text { fill: #ec6a52; font-family: var(--mono); font-weight: 600; }
+.stamp__ring { font-size: 15.5px; letter-spacing: .09em; }
+.stamp__big { font-size: 23px; } .stamp__small { font-size: 13px; letter-spacing: .06em; }
+.stamp.is-down { animation: stamp .42s cubic-bezier(.3, 1.6, .5, 1) forwards; }
+.team__stamp.is-hit { animation: hit .38s .3s ease-out; }
+@keyframes stamp { 0% { opacity: 0; transform: rotate(-14deg) scale(2.6); } 60% { opacity: .95; } 100% { opacity: .88; transform: rotate(-14deg) scale(1); } }
+@keyframes hit { 0%, 100% { transform: none; } 30% { transform: translateY(3px) scale(.995); } 60% { transform: translateY(-1px); } }
+html:not(.js-scrub) .stamp { opacity: .88; transform: rotate(-14deg); }
+
+@media (max-width: 900px) {
+  .flight__nums, .flight__dims, .flight__cross { display: none; }
+  .flight__photo { inset: 0; background-position: 30% 50%; }
+  .stamp { width: 120px; height: 120px; right: -8px; top: -60px; }
+}
+@media (prefers-reduced-motion: reduce) { .flight__photo { opacity: .45; } }
+
 @media (max-width: 900px) {
   .top { gap: 12px; }
   .brand__name { display: none; }

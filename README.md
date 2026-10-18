@@ -46,3 +46,8 @@ GitHub Actions собирает сайт и публикует его на GitHu
 | `build.py` | сборщик страниц |
 
 Анимации отключаются, если в системе включено «уменьшение движения» (`prefers-reduced-motion`).
+
+## Сторонние материалы
+
+- Фото чертёжного стола на обложке (`assets/hero/desk.webp`, тонировано в синьку) – Lucas Kepner, [Unsplash](https://unsplash.com/photos/architectural-blueprints-with-drafting-tools-Yn8D5B8C-eY), Unsplash License.
+- Плавная прокрутка – [Lenis](https://github.com/darkroomengineering/lenis) 1.1.13 (`assets/js/vendor/lenis.min.js`), лицензия MIT.

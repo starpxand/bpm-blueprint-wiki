@@ -58,13 +58,15 @@
   });
   // финал: семь нотаций вокруг процесса
   const NOTES = ["Flow Chart", "DFD", "RAD", "IDEF", "ERD", "UML", "BPMN"];
+  const SLUGS = ["flowchart", "dfd", "rad", "idef", "erd", "uml", "bpmn"];
   const C = { x: (L0 + R0) / 2 - 20, y: T0 + LH * 2 };
   h += `<g class="pm-fan">`;
   NOTES.forEach((n, k) => {
     const a = (-90 + (360 / 7) * k) * Math.PI / 180;
-    const x = C.x + Math.cos(a) * 300, y = C.y + Math.sin(a) * 200, w = n.length * 9 + 30;
-    h += `<g class="pm-note" data-k="${k}"><line x1="${C.x}" y1="${C.y}" x2="${x}" y2="${y}" pathLength="1"/>
-      <rect x="${x - w / 2}" y="${y - 18}" width="${w}" height="36" rx="4"/><text x="${x}" y="${y + 5}" text-anchor="middle">${n}</text></g>`;
+    const x = C.x + Math.cos(a) * 300, y = C.y + Math.sin(a) * 200, w = n.length * 9 + 58;
+    h += `<a class="pm-note" data-k="${k}" href="notations/${SLUGS[k]}.html" aria-label="Лист ${k + 1}: ${n}"><line x1="${C.x}" y1="${C.y}" x2="${x}" y2="${y}" pathLength="1"/>
+      <rect x="${x - w / 2}" y="${y - 18}" width="${w}" height="36" rx="4"/><text x="${x - w / 2 + 12}" y="${y + 5}" class="pm-note__no">${String(k + 1).padStart(2, "0")}</text>
+      <text x="${x + 13}" y="${y + 5}" text-anchor="middle">${n}</text></a>`;
   });
   h += `<g class="pm-core" transform="translate(${C.x} ${C.y})"><rect x="-92" y="-26" width="184" height="52" rx="6"/>
     <text y="-3" text-anchor="middle">Обработка заказа</text><text y="15" text-anchor="middle" class="pm-core__s">1 процесс · 7 нотаций</text></g></g>`;
@@ -99,14 +101,17 @@
     at.forEach((a, i) => { if (t >= a - 0.004) on = i; });
     tasks.forEach((g, i) => { g.classList.toggle("is-on", i === on && t < 0.999); g.classList.toggle("is-done", i < on || t >= 0.999); });
     steps.forEach((s, k) => { s.classList.toggle("is-on", k === Math.max(on, 0) && f < 0.5); s.classList.toggle("is-done", k < on || f >= 0.5); });
-    map.forEach((e) => { e.style.opacity = 1 - f * 0.9; });
+    const fade = clamp(f / 0.45);
+    map.forEach((e) => { e.style.opacity = 1 - fade * 0.93; });
     fan.style.opacity = f > 0 ? 1 : 0;
     notes.forEach((g, k) => {
-      const q = clamp(f * 1.7 - k * 0.1);
+      const q = clamp((f - 0.3) * 2.6 - k * 0.07);   // последний лист веера дорисован к f ≈ 0,85
       g.querySelector("line").style.strokeDashoffset = 1 - q;
-      g.querySelector("rect").style.opacity = g.querySelector("text").style.opacity = clamp(q * 2 - 0.6);
+      const o = clamp(q * 2 - 0.6);
+      g.querySelectorAll("rect, text").forEach((el) => { el.style.opacity = o; });
+      g.setAttribute("tabindex", o > 0.9 ? "0" : "-1");   // невидимые ссылки не ловят фокус
     });
-    svg.querySelector(".pm-core").style.opacity = clamp(f * 2);
+    svg.querySelector(".pm-core").style.opacity = clamp((f - 0.22) * 3);
     story.classList.toggle("is-final", f > 0.6);
   }
 

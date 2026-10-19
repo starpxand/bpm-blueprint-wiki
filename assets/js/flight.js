@@ -1,5 +1,6 @@
 /* Обложка: «камера» летит сквозь альбом из семи листов. Прокрутка = продвижение по оси Z;
-   у каждого листа камера притормаживает (лист крупно и читаемо, рядом подпись), затем лист пролетает мимо.
+   у каждого листа камера притормаживает (лист крупно и читаемо, рядом подпись), затем лист перелистывается –
+   поворачивается вокруг левого края, как страница альбома, и открывает следующий.
    Сами диаграммы не анимируются – двигаются только листы, камера и чертёжные пометки вокруг них. */
 (() => {
   const sec = document.querySelector(".flight");
@@ -23,6 +24,7 @@
   const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
   const smooth = (t) => t * t * (3 - 2 * t);
   let mx = 0, my = 0, sx = 0, sy = 0, ticking = false, sCur = null;
+  let widths = sheets.map((el) => el.offsetWidth);   // ширина листов – для поворота вокруг края; меняется только при resize
 
   // камера: равномерный полёт с «зависанием» на середине каждого сегмента
   const camAt = (s) => {
@@ -73,6 +75,9 @@
       const fDx = narrow ? 0 : innerWidth * 0.12;                  // справа от подписи
       const far = clamp(1 - (-fRel - D) / (0.55 * D));             // следующий лист виден заранее, вдали
       const near = clamp(1 - (fRel + 260) / 420);                  // уход за камеру
+      // перелистывание: сразу после паузы чтения лист поворачивается вокруг левого края к зрителю
+      const turn = smooth(clamp((fRel + R - 40) / 290));
+      el.style.setProperty("--turn", turn.toFixed(3));
       const tilt = clamp((fRel + R) / 900, -1, 1);                 // поворачивается, пролетая мимо
       // заставка: альбом веером справа от заголовка (первый лист сверху)
       const j = k - 3;
@@ -83,15 +88,17 @@
       const lerp = (a, b) => a + (b - a) * e;
       const rel = lerp(dRel, fRel), dx = lerp(dDx, fDx), dy = lerp(dDy, 0);
       const rz = lerp(j * (narrow ? 5 : 4), 0), ry = lerp(-6 + sx * 6, side * (-4 + tilt * 12) - 6 + sx * 4), rx = lerp(4 - sy * 4, 2 - tilt * 6);
-      const op = lerp(narrow && !mOk ? 0 : 1 - k * 0.04, Math.min(far, near));
+      const op = lerp(narrow && !mOk ? 0 : 1 - k * 0.04, Math.min(far, near, 1 - clamp((turn - 0.82) / 0.18)));
       el.style.opacity = op.toFixed(3);
       el.style.visibility = op <= 0.01 ? "hidden" : "visible";
       el.style.zIndex = String(10 - k);
       if (op > 0.01) {
-        el.style.transform = `translate3d(${dx}px, ${dy - sy * 30}px, ${rel}px) rotateY(${ry}deg) rotateX(${rx}deg) rotateZ(${rz}deg) translate(-50%, -50%) scale(${narrow ? lerp(mS, 1) : 1})`;
+        const W = widths[k];   // поворот вокруг левого края: сдвиг на ширину – поворот – обратно
+        const page = turn > 0.001 ? ` translateX(${-W}px) rotateY(${(-turn * 96).toFixed(2)}deg) translateX(${W}px)` : "";
+        el.style.transform = `translate3d(${dx}px, ${dy - sy * 30}px, ${rel}px) rotateY(${ry}deg) rotateX(${rx}deg) rotateZ(${rz}deg)${page} translate(-50%, -50%) scale(${narrow ? lerp(mS, 1) : 1})`;
         // глубина резкости: дальние и пролетающие листы мягко размываются
         const blur = narrow || fRel + R > 0 ? 0 : clamp((-(fRel + R) - 300) / 1100) * 2.6 * e;   // только дальние, подлетающие листы
-        el.style.filter = blur > 0.25 ? `blur(${blur.toFixed(2)}px)` : "none";
+        el.style.filter = turn > 0.001 ? `brightness(${(1 - turn * 0.28).toFixed(3)})` : blur > 0.25 ? `blur(${blur.toFixed(2)}px)` : "none";
         el.style.setProperty("--gl", `${(50 - ry * 4 - sx * 30).toFixed(1)}%`);   // блик бумаги следует за поворотом
       }
       const d = Math.abs(s - (k + 0.5));
@@ -134,7 +141,7 @@
 
   const request = () => { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
   addEventListener("scroll", request, { passive: true });
-  addEventListener("resize", request);
+  addEventListener("resize", () => { widths = sheets.map((el) => el.offsetWidth); request(); });
   addEventListener("pointermove", (e) => { mx = e.clientX / innerWidth - 0.5; my = e.clientY / innerHeight - 0.5; request(); }, { passive: true });
 
   // перейти к листу k (0..6): плавно, через Lenis, если он есть

@@ -47,8 +47,10 @@
       help.className = "keys";
       help.setAttribute("role", "dialog"); help.setAttribute("aria-label", "Горячие клавиши");
       help.innerHTML = `<div class="keys__box"><p class="keys__t">Горячие клавиши</p><dl>
-        <dt><kbd>1</kbd>–<kbd>7</kbd></dt><dd>лист альбома: Flow Chart, DFD, RAD, IDEF, ERD, UML, BPMN</dd>
+        <dt><kbd>/</kbd> или <kbd>Ctrl</kbd> <kbd>K</kbd></dt><dd>поиск по альбому: листы, разделы, элементы нотаций, источники</dd>
+        <dt><kbd>1</kbd>–<kbd>7</kbd></dt><dd>лист альбома: Flow Chart, DFD, RAD, IDEF, ERD, UML, BPMN; в тренажёре – ответ</dd>
         <dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>предыдущий и следующий лист</dd>
+        <dt><kbd>Shift</kbd> над схемой</dt><dd>лупа ×2,5 (или кнопка с лупой на листе)</dd>
         <dt>двойной щелчок</dt><dd>диаграмма во весь экран; колесо – масштаб, перетаскивание – сдвиг</dd>
         <dt><kbd>Esc</kbd></dt><dd>закрыть полноэкранный просмотр и эту подсказку</dd>
         <dt><kbd>?</kbd></dt><dd>показать или скрыть подсказку</dd></dl>
@@ -63,7 +65,8 @@
     if (e.target.closest("input, textarea, select") || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === "?") { e.preventDefault(); toggleHelp(!help?.classList.contains("is-on")); return; }
     if (e.key === "Escape" && help?.classList.contains("is-on")) { toggleHelp(false); return; }
-    if (/^[1-7]$/.test(e.key) && !document.querySelector(".sheet.is-full")) {
+    if (root.classList.contains("is-finding")) return;
+    if (/^[1-7]$/.test(e.key) && !document.querySelector(".sheet.is-full, [data-quiz]") && !root.classList.contains("is-finding")) {
       const k = Number(e.key) - 1;
       if (window.flightTo && document.querySelector(".flight")?.getBoundingClientRect().bottom > innerHeight) window.flightTo(k);
       else if (sheetsNav[k]) location.href = sheetsNav[k].href;

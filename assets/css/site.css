@@ -23,6 +23,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { scroll-padding-top: calc(var(--top) + 72px); -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -822,7 +823,8 @@ html.js-scrub .quiz__seal { animation: stamp .45s .15s cubic-bezier(.3, 1.6, .5,
 .quiz__form input { min-width: min(320px, 100%); padding: 10px 12px; font: 17px var(--sans); color: var(--ink); background: #fff; border: 1.5px solid var(--ink); border-radius: 3px; }
 .cert-host { margin-top: 34px; }
 .cert-wrap { max-width: 1040px; margin: 0 auto; box-shadow: 0 24px 60px -24px rgba(20, 34, 56, .55); }
-.cert-acts { text-align: center; margin: 18px 0 0; }
+.cert-acts { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin: 18px 0 0; }
+.cert-status { text-align: center; font-size: 14px; }
 
 @media (max-width: 900px) {
   .top__search { padding: 8px; margin-left: 0; }
@@ -922,3 +924,44 @@ html.js-scrub .quiz__seal { animation: stamp .45s .15s cubic-bezier(.3, 1.6, .5,
 .doc td:has(img.sym) { min-width: 200px; }
 /* Mermaid – в натуральную величину (высокие схемы не сжимаются до высоты экрана) */
 .sheet__draw .mermaid svg { max-height: none; width: auto; height: auto; }
+
+/* Самопроверка и отметка о чтении: крупные действия доступны и на телефоне. */
+.stamp-anchor { position: absolute; top: -48px; right: 24px; width: 1px; height: 1px; pointer-events: none; }
+.study { margin-top: 48px; padding: clamp(20px, 4vw, 36px); border: 1px solid var(--rule); border-top: 4px solid var(--ink); background: var(--paper-2); }
+.study__label { margin: 0; font: 500 12px/1.6 var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--ink-2); }
+.doc .study h2 { margin: 10px 0 18px; font-size: clamp(24px, 4vw, 32px); }
+.study__options { display: grid; gap: 10px; }
+.study-option, .study-button { min-height: 48px; border: 1px solid var(--ink-2); padding: 12px 16px; font: 500 16px/1.5 var(--sans); text-align: left; cursor: pointer; touch-action: manipulation; }
+.study-option { display: flex; align-items: baseline; gap: 14px; color: var(--ink); background: var(--paper); }
+.study-option span { font: 500 13px var(--mono); color: var(--ink-2); }
+.study-option:hover:not(:disabled) { border-color: var(--ink); background: #fff; }
+.study-option:disabled { opacity: 1; cursor: default; }
+.study-option.is-correct { border: 2px solid #246542; background: #e2efdf; }
+.study-option.is-wrong { border: 2px solid #a33221; background: #f8e3dc; }
+.study__feedback:empty, .study__share-status:empty { display: none; }
+.study__feedback { padding-left: 16px; border-left: 3px solid var(--ink); }
+.study__footer { display: flex; flex-wrap: wrap; gap: 8px 24px; margin-top: 18px; }
+.study-link { min-height: 44px; border: 0; padding: 8px 0; background: none; color: var(--ink); text-decoration: underline; font: 500 15px/1.5 var(--sans); cursor: pointer; touch-action: manipulation; }
+.study__share-status input { width: 100%; padding: 12px; font-size: 16px; color: var(--ink); background: white; border: 1px solid var(--ink-2); }
+.reading-actions { margin-top: 28px; }
+.study-button { color: #fff; background: var(--desk); }
+.study-button:disabled { background: var(--paper-2); color: var(--ink); border-color: var(--rule); cursor: default; }
+.reading-actions p { font-size: 14px; color: var(--ink-2); }
+.study button:focus-visible, .study-button:focus-visible { outline: 3px solid #126c91; outline-offset: 4px; }
+.ledger__act { flex-wrap: wrap; }
+.toast { width: min(600px, calc(100vw - 32px)); padding-right: 42px; }
+.toast__close { position: absolute; right: 6px; top: 6px; width: 32px; height: 32px; border: 0; background: transparent; color: #fff; font-size: 24px; cursor: pointer; }
+.ledger { grid-template-columns: auto minmax(0, 1fr); }
+.ledger__act { grid-column: 1 / -1; }
+@media (max-width: 600px) {
+  .ledger { grid-template-columns: 1fr; }
+  .study { margin-left: -4px; margin-right: -4px; padding: 18px; }
+  .study-button { width: 100%; text-align: center; }
+}
+@media (pointer: coarse) {
+  .stamp g { filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stamp.is-down, .team__stamp.is-hit { animation: none; }
+}
+@media print { .study-slot, .reading-actions, .toast { display: none; } }

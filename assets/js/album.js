@@ -1,4 +1,4 @@
-/* Зачётка: лист, дочитанный до конца, получает печать «Изучено»; отметки – в меню, на карточках главной,
+/* Зачётка: печать «Изучено» по нажатию; отметки – в меню, на карточках главной,
    в ведомости и в тренажёре. Хранится только в этом браузере (localStorage). */
 (() => {
   const KEY = "bn-album";
@@ -6,10 +6,20 @@
   const SHORT = { flowchart: "Flow Chart", dfd: "DFD", rad: "RAD", idef: "IDEF", erd: "ERD", uml: "UML", bpmn: "BPMN" };
   const root = document.documentElement.dataset.root ?? "";
   const motion = document.documentElement.classList.contains("js-scrub");
+  let memory = { read: {} };
+  let volatile = false;
   const get = () => {
-    try { const d = JSON.parse(localStorage.getItem(KEY)) || {}; d.read ||= {}; return d; } catch (e) { return { read: {} }; }
+    if (volatile) return memory;
+    try {
+      const d = JSON.parse(localStorage.getItem(KEY));
+      if (d && typeof d === "object" && !Array.isArray(d)) {
+        if (!d.read || typeof d.read !== "object" || Array.isArray(d.read)) d.read = {};
+        memory = d;
+      } else memory = { read: {} };
+    } catch (e) { /* Продолжаем с отметками текущей страницы. */ }
+    return memory;
   };
-  const put = (d) => { try { localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { /* приватный режим */ } };
+  const put = (d) => { memory = d; try { localStorage.setItem(KEY, JSON.stringify(d)); volatile = false; return true; } catch (e) { volatile = true; return false; } };
   const fmt = (v) => String(v).replace(".", ",");
   const day = (iso) => new Date(iso).toLocaleDateString("ru-RU");
   window.album = { get, put, ORDER, SHORT };
@@ -30,6 +40,11 @@
       led.querySelector("[data-ledger-best]").textContent = d.best != null ? `, лучший результат тренажёра – ${fmt(d.best)} из 10` : "";
       led.querySelector("[data-ledger-reset]").hidden = !n && d.best == null;
       led.classList.toggle("is-full", n === ORDER.length);
+      const next = ORDER.find((s) => !d.read[s]), link = led.querySelector("[data-next-unread]");
+      if (link) {
+        link.href = next ? `${root}notations/${next}.html` : `${root}trainer.html`;
+        link.textContent = next ? `${n ? 'Продолжить' : 'Начать'}: ${SHORT[next]}` : "Все листы изучены → тренажёр";
+      }
     }
   }
 
@@ -55,38 +70,43 @@
     const t = document.createElement("div");
     t.className = "toast"; t.setAttribute("role", "status");
     t.innerHTML = html;
+    const close = document.createElement("button");
+    close.type = "button"; close.className = "toast__close"; close.textContent = "×";
+    close.setAttribute("aria-label", "Закрыть уведомление"); close.addEventListener("click", () => t.remove());
+    t.append(close);
     document.body.append(t);
     requestAnimationFrame(() => t.classList.add("is-on"));
     setTimeout(() => { t.classList.remove("is-on"); setTimeout(() => t.remove(), 400); }, 6500);
   }
 
-  // лист нотации: считается прочитанным, если дочитан до листания и на странице провели не меньше 12 секунд
+  // Пользователь подтверждает изучение сам, без таймера и зависимости от высоты экрана.
   const slug = ORDER.find((s) => document.body.classList.contains(`p-${s}`));
   if (slug) {
-    const d = get();
-    if (d.read[slug]) seal(slug, d.read[slug], false);
-    else {
-      const t0 = performance.now(), end = document.querySelector(".pager");
-      let timer = 0;
+    const button = document.querySelector("[data-mark-read]");
+    const status = document.querySelector("[data-read-status]");
+    const sync = () => {
+      const iso = get().read[slug];
+      if (button) { button.disabled = !!iso; button.textContent = iso ? "Лист изучен ✓" : "Поставить печать «Изучено»"; }
+      if (iso) seal(slug, iso, false);
+      else document.querySelector(".seal")?.remove();
+    };
+    sync();
+    {
       const done = () => {
         const dd = get();
         if (dd.read[slug]) return;
         dd.read[slug] = new Date().toISOString();
-        put(dd); seal(slug, dd.read[slug], true); paint();
-        const n = Object.keys(dd.read).length;
+        const saved = put(dd);
+        seal(slug, dd.read[slug], true); sync(); paint();
+        if (status) status.textContent = saved ? "Отметка сохранена в этом браузере." : "Отметка действует до закрытия страницы: браузер не разрешил сохранение.";
+        const n = ORDER.filter((s) => dd.read[s]).length;
         toast(n === ORDER.length
           ? `<b>Альбом изучен целиком: 7 из 7.</b> Проверьте себя в <a href="${root}trainer.html">тренажёре</a> и получите свидетельство.`
           : `<b>Лист «${SHORT[slug]}» – в зачётке.</b> Изучено ${n} из 7. <a href="${root}index.html#sheets">Ведомость</a>`);
       };
-      if (end && "IntersectionObserver" in window) {
-        new IntersectionObserver(([e]) => {
-          clearTimeout(timer);
-          if (!e.isIntersecting) return;
-          const wait = 12000 - (performance.now() - t0);
-          if (wait <= 0) done(); else timer = setTimeout(done, wait);
-        }, { threshold: 0.4 }).observe(end);
-      }
+      button?.addEventListener("click", done);
     }
+    addEventListener("storage", (e) => { if (e.key === KEY) sync(); });
   }
 
   document.querySelector("[data-ledger-reset]")?.addEventListener("click", () => {

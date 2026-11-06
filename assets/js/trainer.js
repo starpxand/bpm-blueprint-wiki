@@ -61,7 +61,7 @@
         <p>Десять фрагментов чертежей из альбома. Для каждого выберите нотацию – кнопкой или клавишей <kbd>1</kbd>–<kbd>7</kbd>.</p>
         <ul><li>верный ответ – 1 балл;</li>
           <li>«Отдалить» покажет фрагмент шире, но ответ после этого стоит ½ балла;</li>
-          <li>7 баллов и больше – свидетельство бюро.</li></ul>
+          <li>7 баллов и больше – диплом бюро.</li></ul>
         ${best != null ? `<p class="quiz__best">Ваш лучший результат – <b>${fmt(best)} из 10</b>, разряд «${rankOf(best)}».</p>` : ""}
         <button type="button" class="btn btn--accent quiz__go" data-act="start">Начать</button>
       </div></div>`;
@@ -155,8 +155,8 @@
         <ol class="quiz__log">${rounds.map((r, k) => `<li class="${r.got === 1 ? "is-ok" : r.got ? "is-half" : "is-bad"}"><b>${String(k + 1).padStart(2, "0")}</b> ${esc(r.d.short)}${r.got ? (r.zoom ? " – после «Отдалить»" : "") : ` – ответ ${esc(DATA.find((x) => x.n === r.pick).short)}`}</li>`).join("")}</ol>
         ${weak.length ? `<p class="quiz__weak">Стоит перечитать: ${weak.map((w) => `<a href="${root}${w.url}">${esc(w.short)}</a>`).join(", ")}.</p>` : `<p class="quiz__weak">Ни одной ошибки – все семь нотаций узнаются с первого взгляда.</p>`}
         <div class="quiz__actions"><button type="button" class="btn" data-act="again">Пройти ещё раз</button>
-          ${score >= 7 ? `<button type="button" class="btn btn--accent" data-act="cert">Получить свидетельство</button>` : `<span class="quiz__need">Свидетельство – от 7 баллов.</span>`}</div>
-        <form class="quiz__form" hidden><label>Как подписать свидетельство?
+          ${score >= 7 ? `<button type="button" class="btn btn--accent" data-act="cert">Получить диплом</button>` : `<span class="quiz__need">Диплом – от 7 баллов.</span>`}</div>
+        <form class="quiz__form" hidden><label>Имя на дипломе
           <input name="who" maxlength="60" required autocomplete="name" placeholder="Фамилия Имя" value="${esc(d.who || "")}"></label>
           <button type="submit" class="btn btn--accent">Оформить</button></form>
       </div></div>
@@ -164,53 +164,13 @@
   }
 
   // ---------------------------------------------------------------- свидетельство
-  const CERT_CSS = `
-.cert{--ink:#142238;--red:#c8432b;container-type:inline-size;position:relative;width:100%;aspect-ratio:297/210;background:#f7f4ec;color:var(--ink);
-  font-family:"IBM Plex Sans","Segoe UI",Arial,sans-serif;box-sizing:border-box;overflow:hidden}
-.cert *{box-sizing:border-box}
-.cert__frame{position:absolute;inset:1.7% 1.7% 1.7% 6.7%;border:.35cqw solid var(--ink)}
-.cert__in{position:absolute;inset:6% 7% 7% 11%;display:grid;grid-template-columns:1fr 26%;gap:3cqw}
-.cert__kick{font:500 1.15cqw/1.3 "IBM Plex Mono",Consolas,monospace;letter-spacing:.08em;color:var(--red);margin:0 0 1.4cqw}
-.cert__title{font:700 5.2cqw/1 "IBM Plex Sans",Arial,sans-serif;letter-spacing:.06em;margin:0}
-.cert__num{font:400 1.25cqw "IBM Plex Mono",Consolas,monospace;margin:.8cqw 0 2.6cqw;color:#4b5a72}
-.cert__lead{font-size:1.6cqw;margin:0 0 .6cqw}
-.cert__who{font:600 3.6cqw/1.15 "IBM Plex Sans",Arial,sans-serif;border-bottom:.2cqw solid var(--ink);padding-bottom:.6cqw;margin:0 0 1.4cqw;overflow-wrap:anywhere}
-.cert__txt{font-size:1.6cqw;line-height:1.45;margin:0 0 2cqw;max-width:52cqw}
-.cert__tab{border-collapse:collapse;font-size:1.45cqw}
-.cert__tab td{border:.12cqw solid var(--ink);padding:.6cqw 1.2cqw}
-.cert tr:hover{background:none!important}
-.cert__tab td:first-child{font:500 1.15cqw "IBM Plex Mono",Consolas,monospace;letter-spacing:.04em;color:#4b5a72}
-.cert__seal{align-self:center;justify-self:center;width:100%;transform:rotate(-12deg)}
-.cert__seal circle{fill:none;stroke:#c8432b;stroke-width:4}.cert__seal circle+circle{stroke-width:2}
-.cert__seal text{fill:#c8432b;font-family:"IBM Plex Mono",Consolas,monospace;font-weight:600}
-.cert__seal .r{font-size:13.5px;letter-spacing:.08em}.cert__seal .b{font-size:30px}.cert__seal .s{font-size:12px;letter-spacing:.05em}
-.cert__block{position:absolute;right:1.7%;bottom:1.7%;width:40%;border-top:.3cqw solid var(--ink);border-left:.3cqw solid var(--ink);display:grid;grid-template-columns:22% 1fr;font-size:1.15cqw}
-.cert__block span{padding:.45cqw .8cqw;border-bottom:.1cqw solid var(--ink)}.cert__block span:nth-child(odd){border-right:.1cqw solid var(--ink);font-family:"IBM Plex Mono",Consolas,monospace;color:#4b5a72}
-.cert__note{position:absolute;left:11%;bottom:3.4%;margin:0;font:400 1cqw "IBM Plex Mono",Consolas,monospace;color:#4b5a72}`;
-
-  function certHTML(who, s, read, num, date) {
-    return `<div class="cert"><div class="cert__frame"></div>
-      <div class="cert__in"><div>
-        <p class="cert__kick">БЮРО НОТАЦИЙ · ТРЕНАЖЁР «УЗНАЙ НОТАЦИЮ»</p>
-        <h2 class="cert__title">СВИДЕТЕЛЬСТВО</h2>
-        <p class="cert__num">№ ${num} от ${date}</p>
-        <p class="cert__lead">удостоверяет, что</p>
-        <p class="cert__who">${esc(who)}</p>
-        <p class="cert__txt">узнаёт по фрагменту чертежа семь нотаций моделирования бизнес-процессов: Flow Chart, DFD, RAD, IDEF, ERD, UML и BPMN.</p>
-        <table class="cert__tab"><tr><td>Результат</td><td>${fmt(s)} из 10</td></tr><tr><td>Разряд</td><td>${rankOf(s)}</td></tr>
-          ${read ? `<tr><td>Листов альбома изучено</td><td>${read} из 7</td></tr>` : ""}</table></div>
-        <svg class="cert__seal" viewBox="0 0 200 200" aria-hidden="true"><defs><path id="cRing" d="M100 100 m-76 0 a76 76 0 1 1 152 0 a76 76 0 1 1 -152 0"/></defs>
-          <circle cx="100" cy="100" r="95"/><circle cx="100" cy="100" r="64"/>
-          <text class="r"><textPath href="#cRing">БЮРО НОТАЦИЙ · ТРЕНАЖЁР · ${date} ·</textPath></text>
-          <text class="b" x="100" y="104" text-anchor="middle">${fmt(s)}</text><text class="s" x="100" y="126" text-anchor="middle">ИЗ 10</text></svg></div>
-      <div class="cert__block"><span>Разраб.</span><span>${esc(who)}</span><span>Пров.</span><span>Бюро нотаций</span><span>Лист</span><span>1 · листов 1</span></div>
-      <p class="cert__note">Учебный тренажёр мини-wiki «Бюро нотаций» – не документ об образовании.</p></div>`;
-  }
+  const CERT_CSS = window.bureauCertificate.css;
+  const certHTML = (who, s, read, num, date) => `<div class="cert">${window.bureauCertificate.svg(who, fmt(s), read, num, date, rankOf(s))}</div>`;
 
   function showCert(who) {
     const d = store.get();
     d.who = who; store.put(d);
-    const read = Object.keys(d.read || {}).length, date = new Date().toLocaleDateString("ru-RU");
+    const read = DATA.filter((x) => d.read?.[x.n]).length, date = new Date().toLocaleDateString("ru-RU");
     const num = String(1000 + Math.floor(Math.random() * 9000));
     if (!document.getElementById("cert-css")) {
       const st = document.createElement("style"); st.id = "cert-css"; st.textContent = CERT_CSS; document.head.append(st);
@@ -218,15 +178,42 @@
     const html = certHTML(who, score, read, num, date);
     const hostC = host.querySelector(".cert-host");
     hostC.innerHTML = `<div class="cert-wrap">${html}</div>
-      <p class="cert-acts"><button type="button" class="btn btn--accent" data-act="print">Распечатать или сохранить в PDF</button></p>`;
+      <div class="cert-acts"><button type="button" class="btn btn--accent" data-act="print">Печать / PDF</button>
+      <button type="button" class="btn" data-act="png">Скачать PNG</button></div><p class="cert-status" role="status"></p>`;
+    hostC.querySelector("[data-act=png]").addEventListener("click", async (event) => {
+      const button = event.currentTarget, status = hostC.querySelector(".cert-status");
+      button.disabled = true; status.textContent = "Готовим изображение…";
+      const svg = hostC.querySelector("svg").outerHTML;
+      const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+      try {
+        const picture = new Image();
+        await new Promise((resolve, reject) => { picture.onload = resolve; picture.onerror = reject; picture.src = url; });
+        const canvas = document.createElement("canvas"); canvas.width = 2800; canvas.height = 1980;
+        canvas.getContext("2d").drawImage(picture, 0, 0, 2800, 1980);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+        if (!blob) throw new Error("PNG unavailable");
+        const downloadURL = URL.createObjectURL(blob), link = document.createElement("a");
+        link.href = downloadURL; link.download = "Бюро-нотаций-диплом.png"; document.body.append(link); link.click(); link.remove();
+        setTimeout(() => URL.revokeObjectURL(downloadURL), 60000);
+        status.textContent = "PNG готов. На телефоне его можно сохранить в «Файлы» или «Фото».";
+      } catch (e) { status.textContent = "Не удалось создать PNG. Используйте «Печать / PDF»."; }
+      finally { URL.revokeObjectURL(url); button.disabled = false; }
+    });
     hostC.querySelector("[data-act=print]").addEventListener("click", () => {
-      const doc = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Свидетельство – ${esc(who)}</title>
-        <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
-        <style>${CERT_CSS}@page{size:A4 landscape;margin:0}html,body{margin:0}body{background:#888}.cert{width:297mm;margin:0 auto}
-        @media print{body{background:none}}</style></head><body>${html}
-        <script>document.fonts.ready.then(()=>setTimeout(()=>print(),300))<\/script></body></html>`;
+      const doc = `<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Диплом – ${esc(who)}</title>
+        <style>${CERT_CSS}@page{size:A4 landscape;margin:0}html,body{margin:0}body{background:#ddd}.cert{max-width:1400px;margin:0 auto}
+        .print-action{display:block;margin:16px auto;padding:12px 24px;font:16px Arial;cursor:pointer}
+        @media print{body{background:none}.print-action{display:none}.cert{width:297mm;height:209.8mm}.cert>svg{height:209.8mm}}</style></head><body>${html}
+        <button class="print-action" onclick="print()">Распечатать или сохранить в PDF</button>
+        <script>document.fonts.ready.then(()=>setTimeout(()=>print(),150))<\/script></body></html>`;
       const url = URL.createObjectURL(new Blob([doc], { type: "text/html" }));
-      window.open(url, "_blank");
+      const popup = window.open(url, "_blank");
+      if (!popup) {
+        const status = hostC.querySelector(".cert-status");
+        status.textContent = "Браузер заблокировал окно. ";
+        const link = document.createElement("a"); link.href = url; link.target = "_blank"; link.textContent = "Открыть диплом для печати";
+        status.append(link);
+      }
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     });
     hostC.scrollIntoView({ behavior: "smooth", block: "start" });

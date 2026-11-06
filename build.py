@@ -195,7 +195,7 @@ def footer(depth):
 def page(title, body, depth=0, active="", desc="", scripts=("scrub",), mermaid=False, extra_head="", path=""):
     pre = "../" * depth
     desc = desc or "Мини-wiki по нотациям моделирования бизнес-процессов: Flow Chart, DFD, RAD, IDEF, ERD, UML, BPMN"
-    js = "".join(f'<script src="{pre}assets/js/{s}.js?v={VER}" defer></script>' for s in ("vendor/lenis.min", "fx", "search", "album", *scripts))
+    js = "".join(f'<script src="{pre}assets/js/{s}.js?v={VER}" defer></script>' for s in ("vendor/lenis.min", "fx", "search", "album", "study", *scripts))
     mm = (f'<script type="module" src="{pre}assets/js/mermaid-init.js?v={VER}"></script>' if mermaid else "")
     return f"""<!doctype html>
 <html lang="ru" data-root="{pre}">
@@ -275,7 +275,7 @@ def notation_page(i, slug, short, full, author, question):
   </div>
 </section>
 <nav class="toc" aria-label="Разделы листа">{toc}</nav>"""
-    mp = '<div class="mp" aria-hidden="true"><span>М. П.</span></div>'   # место печати «Изучено»
+    mp = '<div class="study-slot" data-study></div><div class="reading-actions"><button type="button" class="study-button" data-mark-read>Поставить печать «Изучено»</button><p data-read-status role="status">Отметка сохраняется только в этом браузере.</p></div><div class="mp" aria-hidden="true"><span>М. П.</span></div>'
     article = f'<article class="doc doc--sheet">{body}{mp}</article>{pager}'
     out = page(title, hero + article, 1, slug, desc=f"{title}: описание, элементы нотации, правила составления, пример, источники",
                scripts=("scrub", "loupe"), mermaid="mermaid" in body, path=f"notations/{slug}.html")
@@ -432,7 +432,7 @@ def trainer_page():
   <noscript><p>Для тренажёра нужен JavaScript.</p></noscript></div></article>
 <script type="application/json" id="quiz-data">{json.dumps(data, ensure_ascii=False).replace("</", "<\\/")}</script>"""
     (OUT / "trainer.html").write_text(
-        page("Тренажёр «Узнай нотацию»", body, 0, "trainer", scripts=("scrub", "trainer"), path="trainer.html",
+        page("Тренажёр «Узнай нотацию»", body, 0, "trainer", scripts=("scrub", "certificate", "trainer"), path="trainer.html",
              desc="Тренажёр: узнайте нотацию моделирования бизнес-процессов по фрагменту чертежа – Flow Chart, DFD, RAD, IDEF, ERD, UML, BPMN"),
         encoding="utf-8")
     INDEX.append(dict(k="страница", t="Тренажёр «Узнай нотацию»", s="10 фрагментов чертежей: угадайте нотацию, получите разряд и свидетельство",
@@ -557,8 +557,8 @@ def index_page():
     <div class="ledger" data-ledger>
       <div class="ledger__marks" aria-hidden="true">{marks}</div>
       <p class="ledger__txt"><b>Зачётка:</b> <span data-ledger-n>0</span> из 7 листов изучено<span data-ledger-best></span>.
-        Дочитайте лист до конца – на нём появится печать «Изучено».</p>
-      <div class="ledger__act"><a class="btn btn--accent" href="trainer.html">Пройти тренажёр</a>
+        Поставьте печать в конце изученного листа. Прогресс хранится в этом браузере.</p>
+      <div class="ledger__act"><a class="btn btn--accent" data-next-unread href="notations/flowchart.html">Начать изучение</a><a class="btn" href="trainer.html">Тренажёр</a>
         <button type="button" class="ledger__reset" data-ledger-reset hidden>очистить зачётку</button></div>
     </div>
   </div>

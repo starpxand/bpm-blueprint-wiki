@@ -7,7 +7,7 @@
   const topH = () => parseFloat(getComputedStyle(root).getPropertyValue("--top")) || 64;
 
   // ------------------------------------------------------------ плавная прокрутка
-  if (motion && window.Lenis) {
+  if (motion && fine && window.Lenis) {
     const lenis = new window.Lenis({ lerp: 0.085, smoothWheel: true, wheelMultiplier: 0.95 });
     window.lenis = lenis;
     const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
@@ -81,9 +81,15 @@
       const io = new IntersectionObserver(([en]) => {
         if (!en.isIntersecting) return;
         io.disconnect();
-        setTimeout(() => { stamp.classList.add("is-down"); stamp.closest(".team__stamp")?.classList.add("is-hit"); }, 350);
-      }, { threshold: 0.6 });
-      io.observe(stamp.closest(".team__stamp") || stamp);
+        stamp.classList.add("is-down");
+        stamp.closest(".team__stamp")?.classList.add("is-hit");
+      }, { threshold: 0, rootMargin: "0px 0px 40px 0px" });
+      // Observe the small, untransformed anchor, not the tall team table.
+      const anchor = document.createElement("span");
+      anchor.className = "stamp-anchor";
+      anchor.setAttribute("aria-hidden", "true");
+      stamp.before(anchor);
+      io.observe(anchor);
     }
   }
 })();
